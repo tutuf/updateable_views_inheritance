@@ -1,0 +1,6 @@
+gg1:
+  id: 2
+  name: 'GG1'
+  type: 'ElectricLocomotive'
+  max_speed: 160
+  electricity_consumption: 3660

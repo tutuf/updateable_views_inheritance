@@ -1,0 +1,3 @@
+class Boat < Vehicle
+
+end

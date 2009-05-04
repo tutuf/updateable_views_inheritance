@@ -1,0 +1,3 @@
+class SteamLocomotive < Locomotive
+
+end

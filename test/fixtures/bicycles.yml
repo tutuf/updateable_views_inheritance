@@ -1,0 +1,6 @@
+bmx:
+  id: 1
+  name: 'BMX'
+  vehicle_type: 'Bicycle'
+  number_of_wheels: 2
+  number_of_gears: 7

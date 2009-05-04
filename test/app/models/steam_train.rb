@@ -1,0 +1,3 @@
+class SteamTrain < Train
+
+end

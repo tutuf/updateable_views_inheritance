@@ -1,0 +1,3 @@
+class MaglevTrain < ElectricTrain
+
+end

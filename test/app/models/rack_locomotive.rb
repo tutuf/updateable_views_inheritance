@@ -1,0 +1,3 @@
+class RackLocomotive < Locomotive
+
+end

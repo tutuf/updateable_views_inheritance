@@ -1,0 +1,6 @@
+ship:
+  id: 7
+  name: 'Sea side'
+  vehicle_type: 'Boat'
+  mast_number: 3
+  

@@ -1,0 +1,8 @@
+mag:
+  id: 6
+  name: 'Mag'
+  vehicle_type: 'MaglevTrain'
+  number_of_rails: 2
+  max_speed: 120
+  electricity_consumption: 460
+  magnetic_field: 1

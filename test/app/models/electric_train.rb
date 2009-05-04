@@ -1,0 +1,3 @@
+class ElectricTrain < Train
+
+end

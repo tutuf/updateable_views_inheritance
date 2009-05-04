@@ -1,0 +1,128 @@
+=ClassTableInheritance
+
+Implements class table inheritance pattern. For a definition see http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
+
+This plugin messes very little with Rails inheritance mechanism, instead it relies on updatable views in the database to represent inheritors.
+The approach was first suggested by John Wilger in his article http://johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql
+
+==Supported DBMS
+
+Currently only PostgreSQL is supported, but it should be easy to add other DBMSes
+that have updatable aggregate views.
+
+==Setup
+
+Keep in mind that only PostgreSQL is currently supported.
+1. Run <tt>rake class_table_inheritance:install</tt> to create migration that creates a table used by the plugin.
+1. Run <tt>rake db:migrate</tt> to actually create the table.
+1. Set <tt>config.active_record.schema_format = :sql</tt> in <tt>config/environment.rb</tt>. Database views and rules are not supported in schema.rb.
+
+==Usage
+
+===Example
+
+First the migrations:
+
+  class CtiExample < ActiveRecord::Migration
+    def self.up
+
+      create_table :locomotives do |t|
+        t.string :name
+        t.integer :max_speed
+        t.string :type
+      end
+
+      create_table( :steam_locomotives_data, :id => false ) do |t|
+        t.integer :locomotive_id
+        t.decimal :water_consumption, :precision => 6, :scale => 2
+        t.decimal :coal_consumption, :precision => 6, :scale => 2
+      end
+      execute "ALTER TABLE steam_locomotives_data ADD PRIMARY KEY (locomotive_id)"
+      execute "ALTER TABLE steam_locomotives_data ADD FOREIGN KEY (locomotive_id) REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
+      
+      create_child_view :locomotives, :steam_locomotives
+      
+      create_table( :raw_electric_locomotives, :id => false )  do |t|
+        t.integer :locomotive_id
+        t.decimal :electricity_consumption, :precision => 6, :scale => 2
+      end
+      execute "ALTER TABLE raw_electric_locomotives ADD PRIMARY KEY (locomotive_id)"
+      execute "ALTER TABLE raw_electric_locomotives ADD FOREIGN KEY (locomotive_id) REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
+      
+      create_child_view :locomotives, :electric_locomotives, :raw_electric_locomotives
+    end
+    
+    def self.down
+      drop_view  :steam_locomotives
+      drop_table :steam_locomotives_data
+      execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'steam_locomotives'"
+      drop_view  :electric_locomotives
+      drop_table :raw_electric_locomotives
+      execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'electric_locomotives'"
+      drop_table :locomotives
+    end
+  end
+
+Primary key on child tables must be declared, because the plugin uses it for creating the aggregate view. Foreign key constraint on the primary key of children tables with <tt>ON DELETE CASCADE ON UPDATE CASCADE</tt> must be set  - if it's not specified, nothing can be deleted from the view.
+
+And the models:
+  class Locomotive
+  end
+  
+  class SteamLocomotive < Locomotive
+    set_table_name :steam_locomotives
+  end
+
+  class ElectricLocomotive < Locomotive
+    set_table_name :electric_locomotives
+  end
+
+Note that models of children classes (inheritors) must specify table name explicitly.
+
+===Changing Columns in Underlying Tables
+
+When adding, renaming or removing column in underlying table views have to be removed with <tt>remove_parent_and_children_views</tt> which takes 
+the name of the relation which columns are changed and then rebuilt after the operation with <tt>remove_parent_and_children_views</tt> which takes the same argument. Example:
+  class RemoveColumnInParentTable < ActiveRecord::Migration
+    def self.up
+      remove_parent_and_children_views(:locomotives)
+      remove_column(:locomotives, :max_speed)
+      rebuild_parent_and_children_views(:locomotives)
+    end
+  end 
+
+==Renaming Underlying Tables
+
+1. Remove views depending on old table (+remove_parent_and_children_views+).
+1. Rename the table.
+1. execute "UPDATE class_table_inheritance SET child_aggregate_view = 'new_table_name' WHERE child_aggregate_view = 'old_table_name'"
+1. execute "UPDATE class_table_inheritance SET parent_relation = 'new_table_name' WHERE parent_relation = 'old_table_name'"
+1. Rebuild views (+rebuild_parent_and_children_views+).
+
+===Removing Classes
+
+1. Remove its view (+drop_view+).
+1. Remove its table (+drop_table+).
+1. Delete its record from +class_table_inheritance+ table.
+
+==Compatibility with Single Table Inheritance
+
+The approach taken in this plugin is completely independent from Rails single table inheritance. STI and CLTI can safely be mixed in one inheritance chain.
+
+==Testing Your App
+
+Run rake class_table_inheritance:fixture to generate fixture for the +class_table_inheritance+ table. <b>Without it primary key sequence for 
+inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b>
+
+==Testing the Plugin
+
+The plugin is tested against isolated database +class_table_inheritance_plugin_test+ which is created with <tt>rake class_table_inheritance:test:prepare_db</tt>. If you wish to use the standard Rails <tt>test:plugins</tt> task, first create the database:
+  rake class_table_inheritance:test:rebuild_database 
+  rake test:plugins PLUGIN=class_table_inheritance
+or simply:
+  rake class_table_inheritance:test
+
+Test log is available in <tt>test/debug.log</tt> in the directory of this plugin. Tests can be run outside of Rails app.
+
+==TODO
+- Utility method (or better, a trigger) to fix possible inconsistency when children and parent records in class_table_inheritance table no longer exist as tables.

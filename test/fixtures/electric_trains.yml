@@ -1,0 +1,7 @@
+gg1:
+  id: 5
+  name: 'GG1'
+  vehicle_type: 'ElectricTrain'
+  number_of_rails: 2
+  max_speed: 160
+  electricity_consumption: 3660

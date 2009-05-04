@@ -1,0 +1,7 @@
+rocket:
+  id: 1
+  name: 'Stephenson Rocket'
+  type: 'SteamLocomotive'
+  max_speed: 20
+  water_consumption: 13
+  coal_consumption: 20

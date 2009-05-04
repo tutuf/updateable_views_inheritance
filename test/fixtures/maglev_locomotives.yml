@@ -1,0 +1,7 @@
+mag:
+  id: 8
+  name: 'MAG'
+  type: 'MaglevLocomotive'
+  max_speed: 120
+  electricity_consumption: 4660
+  magnetic_field: 1

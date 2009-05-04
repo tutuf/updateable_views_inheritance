@@ -1,0 +1,3 @@
+class MaglevLocomotive < ElectricLocomotive
+
+end

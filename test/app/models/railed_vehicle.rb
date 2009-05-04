@@ -1,0 +1,3 @@
+class RailedVehicle < Vehicle
+
+end

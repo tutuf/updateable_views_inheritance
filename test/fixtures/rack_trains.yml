@@ -1,0 +1,7 @@
+rack:
+  id: 4
+  name: 'Rack'
+  vehicle_type: 'RackTrain'
+  number_of_rails: 2
+  max_speed: 100
+  bidirectional: true

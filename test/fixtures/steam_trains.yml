@@ -1,0 +1,8 @@
+steam_tr:
+  id: 3
+  name: 'Steam Train'
+  vehicle_type: 'SteamTrain'
+  number_of_rails: 2
+  max_speed: 21
+  water_consumption: 14
+  coal_consumption: 24

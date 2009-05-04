@@ -1,0 +1,12 @@
+volvo:
+  id: 2
+  name: 'Volvo'
+  vehicle_type: 'Car'
+  number_of_wheels: 4
+  number_of_doors: 4
+jeep:
+  id: 8
+  name: 'Jeep'
+  vehicle_type: 'Car'
+  number_of_wheels: 4
+  number_of_doors: 4
