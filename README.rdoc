@@ -93,7 +93,7 @@ the name of the relation which columns are changed and then rebuilt after the op
     end
   end 
 
-==Renaming Underlying Tables
+===Renaming Underlying Tables
 
   remove_parent_and_children_views(:old_name,:new_name)
   rename_table(:old_name,:new_name)
@@ -113,12 +113,14 @@ Note that you should remove only leaf classes (i.e. those that do not have desce
 
 The approach taken in this plugin is completely independent from Rails single table inheritance. STI and CLTI can safely be mixed in one inheritance chain.
 
-==Testing Your App
+===Testing 
 
-Run rake class_table_inheritance:fixture to generate fixture for the +class_table_inheritance+ table. <b>Without it primary key sequence for 
+===Testing Your App
+
+Run <tt>rake class_table_inheritance:fixture</tt> to generate fixture for the class_table_inheritance table. <b>Without it primary key sequence for 
 inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b>
 
-==Testing the Plugin
+===Testing the Plugin
 
 The plugin is tested against isolated database +class_table_inheritance_plugin_test+ which is created with <tt>rake class_table_inheritance:test:prepare_db</tt>. If you wish to use the standard Rails <tt>test:plugins</tt> task, first create the database:
   rake class_table_inheritance:test:rebuild_database 
@@ -127,6 +129,3 @@ or simply:
   rake class_table_inheritance:test
 
 Test log is available in <tt>test/debug.log</tt> in the directory of this plugin. Tests can be run outside of Rails app.
-
-==TODO
-- Utility method (or better, a trigger) to fix possible inconsistency when children and parent records in class_table_inheritance table no longer exist as tables.
