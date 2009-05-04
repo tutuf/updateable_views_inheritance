@@ -38,7 +38,8 @@ First the migrations:
         t.decimal :coal_consumption, :precision => 6, :scale => 2
       end
       execute "ALTER TABLE steam_locomotives_data ADD PRIMARY KEY (locomotive_id)"
-      execute "ALTER TABLE steam_locomotives_data ADD FOREIGN KEY (locomotive_id) REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
+      execute "ALTER TABLE steam_locomotives_data ADD FOREIGN KEY (locomotive_id) 
+               REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
       
       create_child_view :locomotives, :steam_locomotives
       
@@ -47,7 +48,8 @@ First the migrations:
         t.decimal :electricity_consumption, :precision => 6, :scale => 2
       end
       execute "ALTER TABLE raw_electric_locomotives ADD PRIMARY KEY (locomotive_id)"
-      execute "ALTER TABLE raw_electric_locomotives ADD FOREIGN KEY (locomotive_id) REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
+      execute "ALTER TABLE raw_electric_locomotives ADD FOREIGN KEY (locomotive_id) 
+               REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
       
       create_child_view :locomotives, :electric_locomotives, :raw_electric_locomotives
     end
@@ -93,17 +95,19 @@ the name of the relation which columns are changed and then rebuilt after the op
 
 ==Renaming Underlying Tables
 
-1. Remove views depending on old table (+remove_parent_and_children_views+).
-1. Rename the table.
-1. execute "UPDATE class_table_inheritance SET child_aggregate_view = 'new_table_name' WHERE child_aggregate_view = 'old_table_name'"
-1. execute "UPDATE class_table_inheritance SET parent_relation = 'new_table_name' WHERE parent_relation = 'old_table_name'"
-1. Rebuild views (+rebuild_parent_and_children_views+).
+  remove_parent_and_children_views(:old_name,:new_name)
+  rename_table(:old_name,:new_name)
+  execute "UPDATE class_table_inheritance SET child_aggregate_view = 'new_name' WHERE child_aggregate_view = 'old_name'"
+  execute "UPDATE class_table_inheritance SET parent_relation = 'new_name' WHERE parent_relation = 'old_name'"
+  rebuild_parent_and_children_views(:new_name)
 
 ===Removing Classes
 
-1. Remove its view (+drop_view+).
-1. Remove its table (+drop_table+).
-1. Delete its record from +class_table_inheritance+ table.
+Note that you should remove only leaf classes (i.e. those that do not have descendants).
+
+  drop_view(:removed_view_name)
+  drop_table(:removed_table_name)
+  execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'removed_view_name'"
 
 ==Compatibility with Single Table Inheritance
 
