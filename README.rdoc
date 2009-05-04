@@ -7,17 +7,21 @@ The approach was first suggested by John Wilger in his article http://johnwilger
 
 ==Supported DBMS
 
-Currently only PostgreSQL is supported, but it should be easy to add other DBMSes
-that have updatable aggregate views.
+Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing an adapter extension.
 
-==Setup
+==Rails Version
+
+2.3.2
+
+==Usage
+
+===Setup
 
 Keep in mind that only PostgreSQL is currently supported.
 1. Run <tt>rake class_table_inheritance:install</tt> to create migration that creates a table used by the plugin.
 1. Run <tt>rake db:migrate</tt> to actually create the table.
 1. Set <tt>config.active_record.schema_format = :sql</tt> in <tt>config/environment.rb</tt>. Database views and rules are not supported in schema.rb.
 
-==Usage
 
 ===Example
 
@@ -113,7 +117,7 @@ Note that you should remove only leaf classes (i.e. those that do not have desce
 
 The approach taken in this plugin is completely independent from Rails single table inheritance. STI and CLTI can safely be mixed in one inheritance chain.
 
-===Testing 
+==Testing
 
 ===Testing Your App
 
