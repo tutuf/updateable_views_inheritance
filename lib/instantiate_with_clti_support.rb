@@ -1,5 +1,5 @@
-module ActiveRecord
-  class Base
+module ActiveRecord #:nodoc:
+  class Base #:nodoc:
     class << self
       private
       def instantiate_with_clti_support( record )

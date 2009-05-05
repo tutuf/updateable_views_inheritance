@@ -1,21 +1,23 @@
-=Class Table Inheritance
+==Class Table Inheritance
 
 Class Table Inheritance for ActiveRecord. More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
 
-This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes in the inheritance .
-The approach was first suggested by John Wilger (http://johnwilger.com/).
+This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes
+in the inheritance chain. The approach was first suggested by John Wilger (http://johnwilger.com/).
 
-=Supported DBMS
+API is available at http://clti.rubyforge.org/
 
-Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing a database adapter extension for ActiveRecord.
+==Supported DBMS
 
-=Rails Version
+Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing an ActiveRecord database adapter extension.
+
+==Rails Version
 
 2.3.2
 
-=Usage
+==Usage
 
-==Setup
+===Setup
 
 Keep in mind that only PostgreSQL is currently supported.
 1. <tt>rake class_table_inheritance:setup</tt> to create a migration.
@@ -23,7 +25,7 @@ Keep in mind that only PostgreSQL is currently supported.
 1. In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>. Database views and rules are not supported in schema.rb.
 
 
-==Example
+===Example
 
   class CtiExample < ActiveRecord::Migration
     def self.up
@@ -83,7 +85,7 @@ And the models:
 
 Note that models of children classes must specify table name explicitly.
 
-==Changing Columns in Underlying Tables
+===Changing Columns in Underlying Tables
 
   class RemoveColumnInParentTable < ActiveRecord::Migration
     def self.up
@@ -94,7 +96,7 @@ Note that models of children classes must specify table name explicitly.
     end
   end 
 
-==Renaming Underlying Tables
+===Renaming Underlying Tables
 
   remove_parent_and_children_views(:old_name,:new_name)
   rename_table(:old_name,:new_name)
@@ -102,7 +104,7 @@ Note that models of children classes must specify table name explicitly.
   execute "UPDATE class_table_inheritance SET parent_relation = 'new_name' WHERE parent_relation = 'old_name'"
   rebuild_parent_and_children_views(:new_name)
 
-==Removing Classes
+===Removing Classes
 
 Note that you should remove only leaf classes (i.e. those that do not have descendants). If you want to erase a whole chain or part of chain you have to remove first the leaves and then their ancestors.
 
@@ -110,11 +112,9 @@ Note that you should remove only leaf classes (i.e. those that do not have desce
   drop_table(:removed_table_name)
   execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'removed_view_name'"
 
-=Compatibility with Single Table Inheritance
+==Compatibility with Single Table Inheritance
 
 The approach taken in this plugin is completely independent from Rails single table inheritance. STI and CLTI can safely be mixed in one inheritance chain.
-
-=Testing
 
 ==Testing Your App
 
@@ -126,7 +126,7 @@ inheritors' tables won't be bumped to the max and it might not be possible to sa
 The plugin is tested against isolated database +class_table_inheritance_plugin_test+ which is created with <tt>rake class_table_inheritance:test:prepare_db</tt>. If you wish to use the standard Rails <tt>test:plugins</tt> task, first create the database:
   rake class_table_inheritance:test:rebuild_database 
   rake test:plugins PLUGIN=class_table_inheritance
-or in <tt>vendor/plugins/class_table_inheritance</tt>:
-  rake test
+or:
+  cd vendor/plugins/class_table_inheritance && rake test
 
-Test log is available in <tt>test/debug.log</tt> in the directory of this plugin. Tests can be run outside of Rails app.
+Test log is available in <tt>test/debug.log</tt> in the directory of this plugin. Tests can be run outside of Rails app as well as inside.

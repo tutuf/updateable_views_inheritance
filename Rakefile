@@ -1,5 +1,6 @@
 require 'rake/testtask'
 require 'rake/rdoctask'
+require 'rake/contrib/rubyforgepublisher'
 
 desc 'Run unit tests'
 Rake::TestTask.new(:test => 'test:rebuild_database') do |t|
@@ -10,11 +11,19 @@ end
 
 desc 'Generate documentation'
 Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'Class Table Inheritance'
+  rdoc.rdoc_dir = 'html'
+  rdoc.title    = 'Class Table Inheritance plugin for Rails'
   rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README')
-  rdoc.rdoc_files.include('/lib/**/*.rb')
+  rdoc.template = ENV['template'] ? "#{ENV['template']}.rb" : './doc/template/horo'
+  rdoc.rdoc_files.include('README.rdoc')
+  rdoc.rdoc_files.include('./lib/**/*.rb')
+end
+
+
+desc 'Push to repo and publish docs'
+task :push do
+  `git push`
+  Rake::RubyForgePublisher.new('clti', 'sava_chankov').upload
 end
 
 namespace :test do
