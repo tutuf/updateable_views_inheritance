@@ -1,31 +1,29 @@
-=ClassTableInheritance
+=Class Table Inheritance
 
-Implements class table inheritance pattern. For a definition see http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
+Class Table Inheritance for ActiveRecord. More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
 
-This plugin messes very little with Rails inheritance mechanism, instead it relies on updatable views in the database to represent inheritors.
-The approach was first suggested by John Wilger in his article http://johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql
+This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes in the inheritance .
+The approach was first suggested by John Wilger (http://johnwilger.com/).
 
-==Supported DBMS
+=Supported DBMS
 
-Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing an adapter extension.
+Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing a database adapter extension for ActiveRecord.
 
-==Rails Version
+=Rails Version
 
 2.3.2
 
-==Usage
+=Usage
 
-===Setup
+==Setup
 
 Keep in mind that only PostgreSQL is currently supported.
-1. Run <tt>rake class_table_inheritance:install</tt> to create migration that creates a table used by the plugin.
-1. Run <tt>rake db:migrate</tt> to actually create the table.
-1. Set <tt>config.active_record.schema_format = :sql</tt> in <tt>config/environment.rb</tt>. Database views and rules are not supported in schema.rb.
+1. <tt>rake class_table_inheritance:setup</tt> to create a migration.
+1. <tt>rake db:migrate</tt>.
+1. In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>. Database views and rules are not supported in schema.rb.
 
 
-===Example
-
-First the migrations:
+==Example
 
   class CtiExample < ActiveRecord::Migration
     def self.up
@@ -83,21 +81,20 @@ And the models:
     set_table_name :electric_locomotives
   end
 
-Note that models of children classes (inheritors) must specify table name explicitly.
+Note that models of children classes must specify table name explicitly.
 
-===Changing Columns in Underlying Tables
+==Changing Columns in Underlying Tables
 
-When adding, renaming or removing column in underlying table views have to be removed with <tt>remove_parent_and_children_views</tt> which takes 
-the name of the relation which columns are changed and then rebuilt after the operation with <tt>remove_parent_and_children_views</tt> which takes the same argument. Example:
   class RemoveColumnInParentTable < ActiveRecord::Migration
     def self.up
       remove_parent_and_children_views(:locomotives)
       remove_column(:locomotives, :max_speed)
+      rename_column(:name, :title)
       rebuild_parent_and_children_views(:locomotives)
     end
   end 
 
-===Renaming Underlying Tables
+==Renaming Underlying Tables
 
   remove_parent_and_children_views(:old_name,:new_name)
   rename_table(:old_name,:new_name)
@@ -105,31 +102,31 @@ the name of the relation which columns are changed and then rebuilt after the op
   execute "UPDATE class_table_inheritance SET parent_relation = 'new_name' WHERE parent_relation = 'old_name'"
   rebuild_parent_and_children_views(:new_name)
 
-===Removing Classes
+==Removing Classes
 
-Note that you should remove only leaf classes (i.e. those that do not have descendants).
+Note that you should remove only leaf classes (i.e. those that do not have descendants). If you want to erase a whole chain or part of chain you have to remove first the leaves and then their ancestors.
 
   drop_view(:removed_view_name)
   drop_table(:removed_table_name)
   execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'removed_view_name'"
 
-==Compatibility with Single Table Inheritance
+=Compatibility with Single Table Inheritance
 
 The approach taken in this plugin is completely independent from Rails single table inheritance. STI and CLTI can safely be mixed in one inheritance chain.
 
-==Testing
+=Testing
 
-===Testing Your App
+==Testing Your App
 
 Run <tt>rake class_table_inheritance:fixture</tt> to generate fixture for the class_table_inheritance table. <b>Without it primary key sequence for 
 inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b>
 
-===Testing the Plugin
+==Testing the Plugin
 
 The plugin is tested against isolated database +class_table_inheritance_plugin_test+ which is created with <tt>rake class_table_inheritance:test:prepare_db</tt>. If you wish to use the standard Rails <tt>test:plugins</tt> task, first create the database:
   rake class_table_inheritance:test:rebuild_database 
   rake test:plugins PLUGIN=class_table_inheritance
-or simply:
-  rake class_table_inheritance:test
+or in <tt>vendor/plugins/class_table_inheritance</tt>:
+  rake test
 
 Test log is available in <tt>test/debug.log</tt> in the directory of this plugin. Tests can be run outside of Rails app.
