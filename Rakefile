@@ -21,7 +21,7 @@ end
 
 
 desc 'Push to repo and publish docs'
-task :push do
+task :push => :rdoc do
   `git push`
   Rake::RubyForgePublisher.new('clti', 'sava_chankov').upload
 end
