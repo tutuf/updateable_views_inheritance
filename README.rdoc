@@ -7,13 +7,13 @@ in the inheritance chain. The approach was first {suggested by John Wilger}[http
 
 API documentation is available at http://clti.rubyforge.org.
 
-==Supported DBMS
-
-Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing an ActiveRecord database adapter extension.
-
 ==Compatibility
 
-Requires Rails 2.3.2. Works with both Ruby 1.8.6 and 1.9
+Rails: 2.3.2
+
+Ruby: tested with 1.8.6 and 1.9 
+
+Database: PostgreSQL only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
 
 ==Usage
 
@@ -22,8 +22,7 @@ Requires Rails 2.3.2. Works with both Ruby 1.8.6 and 1.9
 Keep in mind that only PostgreSQL is currently supported.
 1. <tt>rake class_table_inheritance:setup</tt> to create a migration.
 1. <tt>rake db:migrate</tt>.
-1. In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>. Database views and rules are not supported in schema.rb.
-
+1. In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>. Database views and rules are not supported in schema.rb by default. There are some plugins that add such support, but class_table_inheritance is not tested against them. 
 
 ===Example
 
