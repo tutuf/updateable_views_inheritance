@@ -11,9 +11,9 @@ API documentation is available at http://clti.rubyforge.org.
 
 Currently only PostgreSQL is supported. Adding another DBMS (should support updatable aggregate views) is as easy as writing an ActiveRecord database adapter extension.
 
-==Rails Version
+==Compatibility
 
-2.3.2
+Requires Rails 2.3.2. Works with both Ruby 1.8.6 and 1.9
 
 ==Usage
 

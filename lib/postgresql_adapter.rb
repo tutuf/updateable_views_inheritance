@@ -136,7 +136,7 @@ module ActiveRecord #:nodoc:
 
       # Recursively delete +parent_relation+ (if it is a view) and the children views the depend on it.
       def remove_parent_and_children_views(parent_relation)
-        children_views = query(<<-end_sql)
+        children_views = query(<<-end_sql).map{|row| row[0]}
           SELECT child_aggregate_view
             FROM class_table_inheritance
            WHERE parent_relation = '#{parent_relation}'
@@ -333,7 +333,7 @@ module ActiveRecord #:nodoc:
                AND a.attnum > 0 AND NOT a.attisdropped
           end_sql
           if !result.nil? && !result.empty?
-            result
+            result[0]
           else
             nil
           end
@@ -357,11 +357,12 @@ module ActiveRecord #:nodoc:
 
         def parent_table(relation)
           if table_exists?('class_table_inheritance')
-            query(<<-end_sql, 'Parent relation')[0]
+           res = query(<<-end_sql, 'Parent relation')[0]
               SELECT parent_relation
                 FROM class_table_inheritance
                WHERE child_aggregate_view = '#{relation}'
             end_sql
+            res[0] if res
           end
         end
         
