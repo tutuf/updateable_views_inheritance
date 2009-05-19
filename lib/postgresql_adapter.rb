@@ -1,6 +1,42 @@
 module ActiveRecord #:nodoc:
   module ConnectionAdapters #:nodoc:
     class PostgreSQLAdapter
+      # Use this in migration to create child table and view.
+      # Options: 
+      # [:parent]
+      #   parent relation
+      # [:child_table_name]
+      #   default is <tt>"#{child_view}_data"</tt>
+      def create_child(child_view, options)
+        raise 'Please call me with a parent, for example: create_child(:steam_locomotives, :parent => :locomotives)' unless options[:parent]
+        parent_relation = options[:parent].to_s
+        if tables.include?(parent_relation)
+          parent_table = parent_relation
+        else # view, interpreted as inheritance chain deeper than two levels
+          parent_table = query("SELECT child_relation FROM class_table_inheritance WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
+        end
+        child_table = options[:table] || "#{child_view}_data"
+        child_table_pk = "#{child_view.singularize}_id"
+        
+        create_table(child_table, :id => false) do |t|
+          t.integer child_table_pk, :null => false
+          yield t
+        end
+        execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
+        execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
+                 REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
+        
+        create_child_view(parent_relation, child_view, child_table)
+      end
+      
+      # Drop child view and table
+      def drop_child(child_view)
+        drop_view(child_view)
+        child_table = query("SELECT child_relation FROM class_table_inheritance WHERE child_aggregate_view = #{quote(child_view)}")[0][0]
+        drop_table(child_table)
+        execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = #{quote(child_view)}"
+      end
+      
       # Creates aggregate updateable view of parent and child relations. The convention for naming child tables is
       # <tt>"#{child_view}_data"</tt>. If you don't follow it, supply +child_table_name+ as third argument.
       def create_child_view(parent_table, child_view, child_table=nil)

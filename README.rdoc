@@ -29,47 +29,28 @@ Keep in mind that only PostgreSQL is currently supported.
 
   class CtiExample < ActiveRecord::Migration
     def self.up
-
       create_table :locomotives do |t|
-        t.string :name
-        t.integer :max_speed
-        t.string :type
+        t.column :name, :string
+        t.column :max_speed, :integer
+        t.column :type, :string
       end
-
-      create_table( :steam_locomotives_data, :id => false ) do |t|
-        t.integer :locomotive_id
+      
+      create_child(:steam_locomotives, :parent => :locomotives) do |t|
         t.decimal :water_consumption, :precision => 6, :scale => 2
-        t.decimal :coal_consumption, :precision => 6, :scale => 2
+        t.decimal :coal_consumption,  :precision => 6, :scale => 2
       end
-      execute "ALTER TABLE steam_locomotives_data ADD PRIMARY KEY (locomotive_id)"
-      execute "ALTER TABLE steam_locomotives_data ADD FOREIGN KEY (locomotive_id) 
-               REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
       
-      create_child_view :locomotives, :steam_locomotives
-      
-      create_table( :raw_electric_locomotives, :id => false )  do |t|
-        t.integer :locomotive_id
+      create_child(:electric_locomotives, :table => :raw_electric_locomotives, :parent => :locomotives)  do |t|
         t.decimal :electricity_consumption, :precision => 6, :scale => 2
       end
-      execute "ALTER TABLE raw_electric_locomotives ADD PRIMARY KEY (locomotive_id)"
-      execute "ALTER TABLE raw_electric_locomotives ADD FOREIGN KEY (locomotive_id) 
-               REFERENCES locomotives ON DELETE CASCADE ON UPDATE CASCADE"
-      
-      create_child_view :locomotives, :electric_locomotives, :raw_electric_locomotives
     end
     
     def self.down
-      drop_view  :steam_locomotives
-      drop_table :steam_locomotives_data
-      execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'steam_locomotives'"
-      drop_view  :electric_locomotives
-      drop_table :raw_electric_locomotives
-      execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'electric_locomotives'"
-      drop_table :locomotives
+      drop_child  :steam_locomotives
+      drop_child  :electric_locomotives
+      drop_table  :locomotives
     end
   end
-
-Primary key on child tables must be declared, because the plugin uses it for creating the aggregate view. Foreign key constraint on the primary key of children tables with <tt>ON DELETE CASCADE ON UPDATE CASCADE</tt> must be set  - if it's not specified, nothing can be deleted from the view.
 
 And the models:
   class Locomotive
@@ -106,11 +87,7 @@ Note that models of children classes must specify table name explicitly.
 
 ===Removing Classes
 
-Note that you should remove only leaf classes (i.e. those that do not have descendants). If you want to erase a whole chain or part of chain you have to remove first the leaves and then their ancestors.
-
-  drop_view(:removed_view_name)
-  drop_table(:removed_table_name)
-  execute "DELETE FROM class_table_inheritance WHERE child_aggregate_view = 'removed_view_name'"
+Note that you should remove only leaf classes (i.e. those that do not have descendants). If you want to erase a whole chain or part of chain you have to remove first the leaves and then their ancestors. Use <tt>drop_child(child_view)</tt> in migrations.
 
 ==Compatibility with Single Table Inheritance
 
