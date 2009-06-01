@@ -215,6 +215,11 @@ module ActiveRecord #:nodoc:
         create_single_table_inheritance_view(sti_aggregate_view, parent_relation, columns_for_view)
       end
 
+      # Overriden - it must return false, otherwise deleting fixtures won't work
+      def supports_disable_referential_integrity?
+        false
+      end
+
       module Tutuf #:nodoc:
         class ClassTableReflection
           class << self

@@ -97,6 +97,10 @@ The approach taken in this plugin is completely independent from Rails single ta
 Run <tt>rake class_table_inheritance:fixture</tt> to generate fixture for the class_table_inheritance table. <b>Without it primary key sequence for 
 inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b>
 
+This plugin re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb like this:
+
+  fixtures(:roots, :trunks, :leafs, ...)
+
 ==Testing the Plugin
 
 The plugin is tested against isolated database +class_table_inheritance_plugin_test+ which is created with <tt>rake class_table_inheritance:test:prepare_db</tt>. If you wish to use the standard Rails <tt>test:plugins</tt> task, first create the database:
