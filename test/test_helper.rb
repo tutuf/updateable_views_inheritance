@@ -19,6 +19,7 @@ class ActiveSupport::TestCase #:nodoc:
   self.fixture_path = "#{File.dirname(__FILE__)}/fixtures/"
   self.use_transactional_fixtures = true
   self.use_instantiated_fixtures  = false
+  ActiveRecord::Migration.verbose = false
 end
 
 # Originally, fixtures are loaded in transactions. For content test commiting if this transaction will commit migration changes too
@@ -49,16 +50,6 @@ class Fixtures
   end
 end
 
-
-class ActiveRecord::Migration
-  class << self
-    attr_accessor :message_count
-    def puts(text="")
-      self.message_count ||= 0
-      self.message_count += 1
-    end
-  end
-end
 
 class Locomotive < ActiveRecord::Base
   abstract_class = true;
