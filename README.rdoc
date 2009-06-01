@@ -13,7 +13,7 @@ Rails: 2.3.2
 
 Ruby: tested with 1.8.6 and 1.9 
 
-Database: PostgreSQL only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
+Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
 
 ==Usage
 

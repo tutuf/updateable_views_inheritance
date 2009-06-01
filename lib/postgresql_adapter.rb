@@ -279,7 +279,8 @@ module ActiveRecord #:nodoc:
               SELECT setval('#{parent_pk_seq}', NEW.#{parent_pk});
               INSERT INTO #{parent_table} 
                      ( #{ [parent_pk, parent_columns].flatten.join(", ") } )
-                     VALUES( currval('#{parent_pk_seq}') #{ parent_columns.empty? ? '' : ',' + parent_columns.collect{ |col| "NEW." + col}.join(",") } );
+                     VALUES( currval('#{parent_pk_seq}') #{ parent_columns.empty? ? '' : ',' + parent_columns.collect{ |col| "NEW." + col}.join(",") } )
+                     #{insert_returning_clause(child_view, parent_columns.unshift(parent_pk)) if supports_insert_with_returning?};
               INSERT INTO #{child_table}
                      ( #{ [child_pk, child_columns].flatten.join(",")} )
                      VALUES( currval('#{parent_pk_seq}') #{ child_columns.empty? ? '' : ',' + child_columns.collect{ |col| "NEW." + col}.join(",") }  )
@@ -309,7 +310,18 @@ module ActiveRecord #:nodoc:
             )
           end_sql
         end
-
+        
+        def insert_returning_clause(child_view,parent_columns)
+          "RETURNING "+
+          columns(child_view).map do |c|
+            if parent_columns.include?(c.name)
+              c.name
+            else
+              "CAST (NULL AS #{c.sql_type})"
+            end
+          end.join(",")
+        end
+        
         # Set default values from the table columns for a view
         def set_defaults(view_name, table_name, columns)
           columns.each do |column| 
