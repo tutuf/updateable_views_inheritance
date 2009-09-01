@@ -1,19 +1,6 @@
 ==Class Table Inheritance
 
-Class Table Inheritance for ActiveRecord. More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
-
-This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes
-in the inheritance chain. The approach was first {suggested by John Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql].
-
-API documentation is available at http://clti.rubyforge.org.
-
-==Compatibility
-
-Rails: 2.3.2
-
-Ruby: tested with 1.8.6 and 1.9 
-
-Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
+More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
 
 ==Usage
 
@@ -100,6 +87,23 @@ inheritors' tables won't be bumped to the max and it might not be possible to sa
 This plugin re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb like this:
 
   fixtures(:roots, :trunks, :leafs, ...)
+
+==Implementation notes
+
+This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes
+in the inheritance chain. The approach was first {suggested by John Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql].
+
+==API
+
+API documentation is available at http://clti.rubyforge.org.
+
+==Compatibility
+
+Rails: 2.3+
+
+Ruby: tested with 1.8.6 and 1.9.1 
+
+Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note for developers: it's not required to use updateable views - children relations can be tables (with some triggers involved) or materialized views.
 
 ==Testing the Plugin
 
