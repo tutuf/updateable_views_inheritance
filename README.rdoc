@@ -1,6 +1,6 @@
 ==Class Table Inheritance
 
-More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
+Store attributes of every inheritor class in its own table. More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
 
 ==Usage
 
