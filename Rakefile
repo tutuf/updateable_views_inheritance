@@ -1,6 +1,5 @@
 require 'rake/testtask'
 require 'rake/rdoctask'
-require 'rake/contrib/rubyforgepublisher'
 
 desc 'Run unit tests'
 Rake::TestTask.new(:test => 'test:rebuild_database') do |t|
