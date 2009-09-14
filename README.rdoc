@@ -99,7 +99,7 @@ API documentation is available at http://clti.rubyforge.org.
 
 ==Compatibility
 
-Rails: 2.3+
+Rails: 2.1+ (tested with 2.1.2, 2.2.2 and 2.3.3, might work with 2.0.x)
 
 Ruby: tested with 1.8.6 and 1.9.1 
 
