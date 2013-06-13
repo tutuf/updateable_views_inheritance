@@ -5,7 +5,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 6)
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w(electric_locomotives maglev_locomotives steam_locomotives).each do |f|
-      Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
+      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
     @connection = ActiveRecord::Base.connection
   end
@@ -131,5 +131,11 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
     assert_equal 'text', @connection.columns(:all_locomotives).detect{|c| c.name == "number_of_engines"}.sql_type
     assert_equal 'one', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{SteamLocomotive.find(:first).id}").first.first
     assert_equal '2', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{ElectricLocomotive.find(:first).id}").first.first
+  end
+  
+  def test_respond_to_missing_attributes
+    Locomotive.table_name = :all_locomotives
+    assert !MaglevLocomotive.new.respond_to?(:non_existing_attribute_in_the_hierarchy), "Active Record is gone haywire - responds to attributes that are never defined"
+    assert !MaglevLocomotive.new.respond_to?(:coal_consumption), "Responds to an attribute not defined in the class' view but in the STI view"
   end
 end

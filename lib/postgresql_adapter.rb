@@ -86,6 +86,11 @@ module ActiveRecord #:nodoc:
         end
       end
 
+      def primary_key(relation)
+        res = pk_and_sequence_for(relation)
+        res && res.first
+      end
+
       # Returns a relation's primary key and belonging sequence. If +relation+ is a table the result is its PK and sequence.
       # When it is a view, PK and sequence of the table at the root of the inheritance chain are returned.
       def pk_and_sequence_for(relation)
@@ -219,6 +224,11 @@ module ActiveRecord #:nodoc:
       def supports_disable_referential_integrity?
         false
       end
+      
+      def table_exists_with_clti_support?(name)
+        is_view?(name) ? true : table_exists_without_clti_support?(name)
+      end
+      alias_method_chain :table_exists?, :clti_support
 
       module Tutuf #:nodoc:
         class ClassTableReflection
@@ -228,7 +238,7 @@ module ActiveRecord #:nodoc:
                 return @@klasses if defined?(@@klasses)
                 @@klasses = []
                 # load model classes so that inheritance_column is set correctly where defined
-                model_filenames.collect{|m| load "#{RAILS_ROOT}/app/models/#{m}";m.match(%r{([^/]+?)\.rb$})[1].camelize.constantize }.each do |klass|
+                model_filenames.collect{|m| load "#{Rails.root}/app/models/#{m}";m.match(%r{([^/]+?)\.rb$})[1].camelize.constantize }.each do |klass|
                   @@klasses << klass if  klass < ActiveRecord::Base
                 end
                 @@klasses.uniq
@@ -252,7 +262,7 @@ module ActiveRecord #:nodoc:
               
               # Returns filenames for models in the current Rails application
               def model_filenames
-                Dir.chdir("#{RAILS_ROOT}/app/models"){ Dir["**/*.rb"] }
+                Dir.chdir("#{Rails.root}/app/models"){ Dir["**/*.rb"] }
               end
           end
         end

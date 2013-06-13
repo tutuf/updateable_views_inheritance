@@ -4,8 +4,12 @@ class ClassTableInheritanceContentTest < ActiveSupport::TestCase
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 5)
     # order of fixtures is important for the test - last loaded should not be with max(id)
-    Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
-    Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
+    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+  end
+
+  def teardown
+    ActiveRecord::Fixtures.reset_cache
   end
   
   def test_find
@@ -14,14 +18,19 @@ class ClassTableInheritanceContentTest < ActiveSupport::TestCase
     assert_equal %w(coal_consumption id max_speed name type water_consumption), 
                  locomotive.attributes.keys.sort, "Could not instantiate properly child"
   end
-  
-  def test_save
-    electric_locomotive = ElectricLocomotive.new(:name=> 'BoBo', :max_speed => 40, :electricity_consumption => 12)
-    assert electric_locomotive.save
-    bobo = Locomotive.find(electric_locomotive.id)
-    assert bobo.kind_of?(ElectricLocomotive)
+
+  def test_exec_query
+    res = ActiveRecord::Base.connection.exec_query(%q{INSERT INTO electric_locomotives (electricity_consumption, max_speed, name, type) VALUES (40, 120, 'test', 'ElectricLocomotive') RETURNING id})
+    assert !res.rows.empty?
+    assert_equal 3, res.rows.first.first.to_i
   end
   
+  def test_save_new
+    electric_locomotive = ElectricLocomotive.new(:name=> 'BoBo', :max_speed => 40, :electricity_consumption => 12)
+    assert electric_locomotive.save, "Couldn't save new"
+    assert electric_locomotive.id, "No id of saved object"
+  end
+
   def test_reset_sequence_after_loading_fixture
     steam_locomotive = SteamLocomotive.new(:name => 'Mogul', :max_speed => 120, :water_consumption => 12.3, :coal_consumption => 54.6)
     assert steam_locomotive.save

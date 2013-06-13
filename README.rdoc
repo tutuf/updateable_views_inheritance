@@ -1,6 +1,18 @@
 ==Class Table Inheritance
 
-Store attributes of every inheritor class in its own table. More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
+Class Table Inheritance for ActiveRecord. More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html.
+
+This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes
+in the inheritance chain. The approach was first {suggested by John Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql].
+
+
+==Compatibility
+
+Rails: 3.2.x
+
+Ruby: tested with 1.8.7 and 1.9.3
+
+Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
 
 ==Usage
 
@@ -43,11 +55,11 @@ And the models:
   end
   
   class SteamLocomotive < Locomotive
-    set_table_name :steam_locomotives
+    self.table_name =  :steam_locomotives
   end
 
   class ElectricLocomotive < Locomotive
-    set_table_name :electric_locomotives
+    self.table_name =  :electric_locomotives
   end
 
 Note that models of children classes must specify table name explicitly.
@@ -65,7 +77,7 @@ Note that models of children classes must specify table name explicitly.
 
 ===Renaming Underlying Tables
 
-  remove_parent_and_children_views(:old_name,:new_name)
+  remove_parent_and_children_views(:old_name)
   rename_table(:old_name,:new_name)
   execute "UPDATE class_table_inheritance SET child_aggregate_view = 'new_name' WHERE child_aggregate_view = 'old_name'"
   execute "UPDATE class_table_inheritance SET parent_relation = 'new_name' WHERE parent_relation = 'old_name'"
@@ -87,23 +99,6 @@ inheritors' tables won't be bumped to the max and it might not be possible to sa
 This plugin re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb like this:
 
   fixtures(:roots, :trunks, :leafs, ...)
-
-==Implementation notes
-
-This plugin messes very little with Rails inheritance mechanism. Instead it relies on updatable views in the database to represent classes
-in the inheritance chain. The approach was first {suggested by John Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql].
-
-==API
-
-API documentation is available at http://clti.rubyforge.org.
-
-==Compatibility
-
-Rails: 2.1+ (tested with 2.1.2, 2.2.2 and 2.3.4)
-
-Ruby: tested with 1.8.6 and 1.9.1 
-
-Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note for developers: it's not required to use updateable views - children relations can be tables (with some triggers involved) or materialized views.
 
 ==Testing the Plugin
 

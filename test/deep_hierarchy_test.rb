@@ -5,9 +5,13 @@ class DeepHierarchyTest < ActiveSupport::TestCase
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 8)
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w(boats electric_trains rack_trains steam_trains cars maglev_trains bicycles).each do |f|
-      Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
+      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
     @connection = ActiveRecord::Base.connection
+  end
+  
+  def teardown
+    ActiveRecord::Fixtures.reset_cache
   end
   
   def test_deeper_hierarchy
@@ -51,9 +55,10 @@ class DeepHierarchyTest < ActiveSupport::TestCase
   def test_single_table_inheritance_view_order_view_columns
     OrderColumnsInAggregateView.up
     assert_equal %w(max_speed number_of_wheels id),
-                 (@connection.query("SELECT attname 
-                                    FROM pg_class, pg_attribute WHERE 
-                                    pg_class.relname = 'all_vehicles' AND 
-                                    pg_class.oid = pg_attribute.attrelid").flatten)[0..2]
+                 (@connection.query("SELECT attname
+                                       FROM pg_class, pg_attribute
+                                      WHERE pg_class.relname = 'all_vehicles'
+                                            AND pg_class.oid = pg_attribute.attrelid
+                                   ORDER BY attnum").flatten)[0..2]
   end
 end

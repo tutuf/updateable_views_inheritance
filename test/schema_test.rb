@@ -10,6 +10,15 @@ class ClassTableInheritanceSchemaTest < ActiveSupport::TestCase
     assert_equal ['id', 'public.locomotives_id_seq'], @connection.pk_and_sequence_for(:maglev_locomotives), "Could not get pk and sequence for child aggregate view"
   end
   
+  def test_primary_key
+    assert_equal 'id', @connection.primary_key(:maglev_locomotives), "Wrong or no primary key for child aggregate view"
+  end
+  
+  
+  def test_content_columns
+    assert !SteamLocomotive.content_columns.include?("id")
+  end
+  
   def test_views
     assert_equal ["electric_locomotives", "maglev_locomotives", "rack_locomotives", "steam_locomotives"], 
                  @connection.views.sort
@@ -115,9 +124,9 @@ class ClassTableInheritanceSchemaTest < ActiveSupport::TestCase
   
   class RenameColumnInParentTable < ActiveRecord::Migration
     def self.up
-      Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
-      Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :maglev_locomotives)
-      Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
+      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :maglev_locomotives)
+      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
       remove_parent_and_children_views(:locomotives)
       rename_column(:locomotives, :max_speed, :maximal_speed)
       rebuild_parent_and_children_views(:locomotives)
@@ -162,5 +171,9 @@ class ClassTableInheritanceSchemaTest < ActiveSupport::TestCase
     ChangeChildRelationView.up
     assert_equal %w(electric_consumption id max_speed name type),
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
+  end
+  
+  def test_table_exists
+    #TODO: test table_exists? monkey patch
   end
 end

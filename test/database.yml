@@ -1,6 +1,7 @@
 postgresql:
-  :adapter: postgresql
-  :username: postgres
-  :password: postgres
-  :database: class_table_inheritance_plugin_test
-  :min_messages: ERROR
+  adapter: postgresql
+  username: postgres
+  password: postgres
+  database: class_table_inheritance_plugin_test
+  min_messages: ERROR
+  prepared_statements: false
