@@ -1,6 +1,6 @@
 class ClassTableInheritanceMigrationGenerator < Rails::Generator::NamedBase #:nodoc:
   def initialize(runtime_args, runtime_options = {})
-    runtime_args << 'add_class_table_inheritance_migration' if runtime_args.empty?
+    runtime_args << 'add_uvi_migration' if runtime_args.empty?
     super
   end
 

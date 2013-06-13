@@ -12,7 +12,7 @@ end
 desc 'Generate documentation'
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'html'
-  rdoc.title    = 'Class Table Inheritance plugin for Rails'
+  rdoc.title    = 'Class Table Inheritance for Rails'
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.template = ENV['template'] ? "#{ENV['template']}.rb" : './doc/template/horo'
   rdoc.rdoc_files.include('README.rdoc')
@@ -27,16 +27,16 @@ task :push => :rdoc do
 end
 
 namespace :test do
-  desc 'Build the plugin test database'
+  desc 'Build the test database'
   task :build_database do 
-    %x( createdb -U postgres class_table_inheritance_plugin_test )
+    %x( createdb -U postgres uvi_test )
   end
 
-  desc 'Drop the plugin test database'
+  desc 'Drop the test database'
   task :drop_database do 
-    %x( dropdb  -U postgres class_table_inheritance_plugin_test )
+    %x( dropdb  -U postgres uvi_test )
   end
 
-  desc 'Rebuild the plugin test database'
+  desc 'Rebuild the test database'
   task :rebuild_database => [:drop_database, :build_database]
 end

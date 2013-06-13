@@ -1,9 +1,9 @@
-class ClassTableInheritanceAdapterNotCompatibleError < StandardError; end
+class UviAdapterNotCompatibleError < StandardError; end
 
-require 'instantiate_with_clti_support'
+require 'instantiate_with_uvi_support'
 if ActiveRecord::Base.connection.is_a?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
   require 'postgresql_adapter'
 else
-  raise ClassTableInheritanceAdapterNotCompatibleError.new("Only PostgreSQL is currently supported by the class table inheritance plugin.")
+  raise UviAdapterNotCompatibleError.new("uvi currently supports only PostgreSQL")
 end
 
