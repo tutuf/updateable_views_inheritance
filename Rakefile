@@ -22,12 +22,12 @@ end
 namespace :test do
   desc 'Build the test database'
   task :create_database do
-    %x( createdb -U postgres uvi_test )
+    %x( createdb -U postgres updateable_views_inheritance_test )
   end
 
   desc 'Drop the test database'
   task :drop_database do 
-    %x( dropdb  -U postgres uvi_test )
+    %x( dropdb  -U postgres updateable_views_inheritance_test )
   end
 
   desc 'Rebuild the test database'

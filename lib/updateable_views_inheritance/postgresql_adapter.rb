@@ -13,7 +13,7 @@ module ActiveRecord #:nodoc:
         if tables.include?(parent_relation)
           parent_table = parent_relation
         else # view, interpreted as inheritance chain deeper than two levels
-          parent_table = query("SELECT child_relation FROM uvi WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
+          parent_table = query("SELECT child_relation FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
         end
         child_table = options[:table] || "#{child_view}_data"
         child_table_pk = "#{child_view.singularize}_id"
@@ -32,9 +32,9 @@ module ActiveRecord #:nodoc:
       # Drop child view and table
       def drop_child(child_view)
         drop_view(child_view)
-        child_table = query("SELECT child_relation FROM uvi WHERE child_aggregate_view = #{quote(child_view)}")[0][0]
+        child_table = query("SELECT child_relation FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(child_view)}")[0][0]
         drop_table(child_table)
-        execute "DELETE FROM uvi WHERE child_aggregate_view = #{quote(child_view)}"
+        execute "DELETE FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(child_view)}"
       end
       
       # Creates aggregate updateable view of parent and child relations. The convention for naming child tables is
@@ -143,7 +143,7 @@ module ActiveRecord #:nodoc:
       def remove_parent_and_children_views(parent_relation)
         children_views = query(<<-end_sql).map{|row| row[0]}
           SELECT child_aggregate_view
-            FROM uvi
+            FROM updateable_views_inheritance
            WHERE parent_relation = '#{parent_relation}'
         end_sql
         children_views.each do |cv|
@@ -160,14 +160,14 @@ module ActiveRecord #:nodoc:
         remove_parent_and_children_views(parent_relation)
         children = query(<<-end_sql)
           SELECT parent_relation, child_aggregate_view, child_relation
-            FROM uvi
+            FROM updateable_views_inheritance
            WHERE parent_relation = '#{parent_relation}'
         end_sql
 
         #if the parent is in the middle of the inheritance chain, it's a view that should be rebuilt as well
         parent = query(<<-end_sql)[0]
           SELECT parent_relation, child_aggregate_view, child_relation
-            FROM uvi
+            FROM updateable_views_inheritance
            WHERE child_aggregate_view = '#{parent_relation}'
         end_sql
         create_child_view(parent[0], parent[1], parent[2]) if (parent && !parent.empty?)
@@ -225,10 +225,10 @@ module ActiveRecord #:nodoc:
         false
       end
       
-      def table_exists_with_uvi_support?(name)
-        is_view?(name) ? true : table_exists_without_uvi_support?(name)
+      def table_exists_with_updateable_views_inheritance_support?(name)
+        is_view?(name) ? true : table_exists_without_updateable_views_inheritance_support?(name)
       end
-      alias_method_chain :table_exists?, :uvi_support
+      alias_method_chain :table_exists?, :updateable_views_inheritance_support
 
       module Tutuf #:nodoc:
         class ClassTableReflection
@@ -370,23 +370,23 @@ module ActiveRecord #:nodoc:
           parent_relation, child_aggregate_view, child_relation = [parent_relation, child_aggregate_view, child_relation].collect{|rel| quote(rel.to_s)}
           exists = query <<-end_sql
             SELECT parent_relation, child_aggregate_view, child_relation
-              FROM uvi
+              FROM updateable_views_inheritance
              WHERE parent_relation      = #{parent_relation}
                AND child_aggregate_view = #{child_aggregate_view}
                AND child_relation       = #{child_relation}
           end_sql
           # log "res: #{exists}"
           if exists.nil? or exists.empty?
-            execute "INSERT INTO uvi (parent_relation, child_aggregate_view, child_relation)" +
+            execute "INSERT INTO updateable_views_inheritance (parent_relation, child_aggregate_view, child_relation)" +
                     "VALUES( #{parent_relation}, #{child_aggregate_view}, #{child_relation} )"
           end
         end
 
         def parent_table(relation)
-          if table_exists?('uvi')
+          if table_exists?('updateable_views_inheritance')
            res = query(<<-end_sql, 'Parent relation')[0]
               SELECT parent_relation
-                FROM uvi
+                FROM updateable_views_inheritance
                WHERE child_aggregate_view = '#{relation}'
             end_sql
             res[0] if res
@@ -406,7 +406,7 @@ module ActiveRecord #:nodoc:
           hierarchy = []
           children = query(<<-end_sql)
             SELECT parent_relation, child_aggregate_view, child_relation
-              FROM uvi
+              FROM updateable_views_inheritance
             WHERE parent_relation = '#{parent_relation}'
           end_sql
           children.each do |child|

@@ -1,14 +1,14 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'uvi/version'
+require 'updateable_views_inheritance/version'
 
 Gem::Specification.new do |s|
-  s.name          = "uvi"
+  s.name          = "updateable_views_inheritance"
   s.version       = Uvi::VERSION
   s.authors       = ["Sava Chankov", "Denitsa Belogusheva"]
   s.email         = ["sava@tutuf.com", "deni@tutuf.com"]
-  s.homepage      = "http://github.com/tutuf/uvi"
+  s.homepage      = "http://github.com/tutuf/updateable_views_inheritance"
   s.summary       = %q{Class table inheritance for ActiveRecord}
   s.description   = %q{Uvi relies on updatable views in the database that join parent and children tables}
   s.license       = "MIT"

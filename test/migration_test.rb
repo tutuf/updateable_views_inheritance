@@ -25,6 +25,6 @@ class ClassTableInheritanceMigrationTest < ActiveSupport::TestCase
     assert_equal %w(locomotives
                     schema_migrations
                     steam_locomotives_data
-                    uvi), @connection.tables.sort
+                    updateable_views_inheritance), @connection.tables.sort
   end
 end

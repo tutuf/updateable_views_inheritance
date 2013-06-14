@@ -17,7 +17,7 @@ Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that yo
 
 ==Install
 
-  gem install uvi
+  gem install updateable_views_inheritance
 
 ==Usage
 
@@ -25,10 +25,10 @@ Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that yo
 
 In Gemfile
 
-  gem 'uvi'
+  gem 'updateable_views_inheritance'
 
 Keep in mind that only PostgreSQL is currently supported.
-1. <tt>rake uvi:setup</tt> to create a migration.
+1. <tt>rake updateable_views_inheritance:setup</tt> to create a migration.
 1. <tt>rake db:migrate</tt>.
 1. In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>. Database views and rules are not supported in default schema.rb.
 
@@ -88,8 +88,8 @@ Note that models of children classes must specify table name explicitly.
 
   remove_parent_and_children_views(:old_name)
   rename_table(:old_name,:new_name)
-  execute "UPDATE uvi SET child_aggregate_view = 'new_name' WHERE child_aggregate_view = 'old_name'"
-  execute "UPDATE uvi SET parent_relation = 'new_name' WHERE parent_relation = 'old_name'"
+  execute "UPDATE updateable_views_inheritance SET child_aggregate_view = 'new_name' WHERE child_aggregate_view = 'old_name'"
+  execute "UPDATE updateable_views_inheritance SET parent_relation = 'new_name' WHERE parent_relation = 'old_name'"
   rebuild_parent_and_children_views(:new_name)
 
 ===Removing Classes
@@ -102,7 +102,7 @@ The approach of this gem is completely independent from Rails single table inher
 
 ==Testing Your App
 
-Run <tt>rake uvi:fixture</tt> to generate fixture for the uvi table. <b>Without it primary key sequence for 
+Run <tt>rake updateable_views_inheritance:fixture</tt> to generate fixture for the updateable_views_inheritance table. <b>Without it primary key sequence for 
 inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b>
 
 This gem re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb like this:

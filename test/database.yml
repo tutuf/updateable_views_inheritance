@@ -2,6 +2,6 @@ postgresql:
   adapter: postgresql
   username: postgres
   password: postgres
-  database: uvi_test
+  database: updateable_views_inheritance_test
   min_messages: ERROR
   prepared_statements: false

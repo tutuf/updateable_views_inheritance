@@ -20,7 +20,7 @@ config = ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__F
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
 ActiveRecord::Base.establish_connection(config[ENV['DB']] || config['postgresql'])
 
-require 'uvi'
+require 'updateable_views_inheritance'
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
