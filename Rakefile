@@ -9,6 +9,8 @@ Rake::TestTask.new(:test => 'test:rebuild_database') do |t|
   t.verbose = true
 end
 
+task :default => :test
+
 desc 'Generate documentation'
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'html'
