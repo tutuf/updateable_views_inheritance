@@ -3,7 +3,7 @@
 Class Table Inheritance for ActiveRecord using updateable views.
 
 More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html. This gem messes very little with Rails inheritance mechanism. 
-Instead it relies on updatable views in the database to represent classes in the inheritance chain. The approach was first {suggested by John 
+Instead it relies on updatable views in the database to represent classes in the inheritance chain. The approach was {first suggested by John 
 Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql].
 
 
@@ -16,21 +16,26 @@ Ruby: tested with 1.8.7 and 1.9.3
 Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
 
 ==Install
-
+Run
   gem install updateable_views_inheritance
 
 ==Usage
 
 ===Setup
 
-In Gemfile
+* In <tt>Gemfile</tt> add <tt>gem 'updateable_views_inheritance'</tt>
+* Run <tt>rails generate updateable_views_inheritance:install && rake db:migrate</tt>
+* In <tt>config/database.yml</tt> аdd to every environment
 
-  gem 'updateable_views_inheritance'
+    prepared_statements: false
 
-Keep in mind that only PostgreSQL is currently supported.
-1. <tt>rake updateable_views_inheritance:setup</tt> to create a migration.
-1. <tt>rake db:migrate</tt>.
-1. In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>. Database views and rules are not supported in default schema.rb.
+ActiveRecord's postgresql adapter has subtle problems with prepared statements that cause strange errors every now and then.
+* In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>
+* In case you're using fixtures, don't forget to run
+
+    rake updateable_views_inheritance:fixture
+
+after every change to the class hierarchy. Otherwise tests may fail.
 
 ===Example
 
@@ -98,13 +103,14 @@ Note that you should remove only leaf classes (i.e. those that do not have desce
 
 ==Compatibility with Single Table Inheritance
 
-The approach of this gem is completely independent from Rails single table inheritance. STI and CLTI can safely be mixed in one inheritance chain.
+The approach of this gem is completely independent from Rails built-in Single Table Inheritance. STI and CLTI can safely be mixed in one inheritance chain.
 
 ==Testing Your App
 
-Run <tt>rake updateable_views_inheritance:fixture</tt> to generate fixture for the updateable_views_inheritance table. <b>Without it primary key sequence for 
-inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b>
+If you use fixtures, you must run <tt>rake updateable_views_inheritance:fixture</tt> to generate fixture for the updateable_views_inheritance table after you add/remove
+classes from the hierarchy or change underlying table or view names. <b>Without it primary key sequence for inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b> If you don't use fixtures for the classes in the hierarchy you don't need to do that.
 
-This gem re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb like this:
+This gem re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb, for
+example:
 
   fixtures(:roots, :trunks, :leafs, ...)
