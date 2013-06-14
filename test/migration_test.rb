@@ -22,9 +22,9 @@ class ClassTableInheritanceMigrationTest < ActiveSupport::TestCase
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 3)
     ActiveRecord::Migrator.down(File.dirname(__FILE__) + '/fixtures/migrations/', 2)
     assert_equal %w(steam_locomotives), @connection.views.sort
-    assert_equal %w(uvi 
-                    locomotives
+    assert_equal %w(locomotives
                     schema_migrations
-                    steam_locomotives_data), @connection.tables.sort
+                    steam_locomotives_data
+                    uvi), @connection.tables.sort
   end
 end

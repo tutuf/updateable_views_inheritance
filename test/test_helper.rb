@@ -1,6 +1,3 @@
-plugin_test_dir = File.dirname(__FILE__)
-$:.unshift(plugin_test_dir + '/../lib')
-
 class Rails
   def self.root
     File.dirname(__FILE__)
@@ -11,13 +8,19 @@ require 'test/unit'
 require 'rubygems'
 require 'active_record'
 require 'active_record/fixtures'
-require 'ruby-debug'
 
-config = ActiveRecord::Base.configurations = YAML::load(IO.read(plugin_test_dir + '/database.yml'))
-ActiveRecord::Base.logger = Logger.new(plugin_test_dir + "/debug.log")
+begin
+  require 'ruby-debug'
+rescue LoadError
+  # no debugger available
+end
+
+
+config = ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
+ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
 ActiveRecord::Base.establish_connection(config[ENV['DB']] || config['postgresql'])
 
-require File.join(plugin_test_dir, '/../init')
+require 'uvi'
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
