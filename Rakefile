@@ -28,7 +28,7 @@ end
 
 namespace :test do
   desc 'Build the test database'
-  task :build_database do 
+  task :create_database do
     %x( createdb -U postgres uvi_test )
   end
 
@@ -38,5 +38,5 @@ namespace :test do
   end
 
   desc 'Rebuild the test database'
-  task :rebuild_database => [:drop_database, :build_database]
+  task :rebuild_database => [:drop_database, :create_database]
 end
