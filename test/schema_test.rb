@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
-class ClassTableInheritanceSchemaTest < ActiveSupport::TestCase  
+class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase  
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 5)
     @connection = ActiveRecord::Base.connection

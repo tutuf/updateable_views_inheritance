@@ -1,3 +1,3 @@
-module Uvi
+module UpdateableViewsInheritance
   VERSION = "1.1.1"
 end

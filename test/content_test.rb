@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
-class ClassTableInheritanceContentTest < ActiveSupport::TestCase
+class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 5)
     # order of fixtures is important for the test - last loaded should not be with max(id)

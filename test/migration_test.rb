@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
-class ClassTableInheritanceMigrationTest < ActiveSupport::TestCase
+class UpdateableViewsInheritanceMigrationTest < ActiveSupport::TestCase
   # We use transactional fixtures - migration from the setup is rolled back by Rails on teardown
   def setup
     @connection = ActiveRecord::Base.connection
