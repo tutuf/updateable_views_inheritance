@@ -46,7 +46,7 @@ end
 
 class Vehicle < ActiveRecord::Base
   abstract_class = true;
-  set_inheritance_column :vehicle_type
+  self.inheritance_column = :vehicle_type
 end
 class WheeledVehicle < Vehicle
   self.table_name =  'wheeled_vehicles'
