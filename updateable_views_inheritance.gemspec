@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email         = ["sava@tutuf.com", "deni@tutuf.com"]
   s.homepage      = "http://github.com/tutuf/updateable_views_inheritance"
   s.summary       = %q{Class table inheritance for ActiveRecord}
-  s.description   = %q{Uvi relies on updatable views in the database that join parent and children tables}
+  s.description   = %q{Class table inheritance for ActiveRecord based on updatable views in the database that join parent and children tables}
   s.license       = "MIT"
 
   s.files         = `git ls-files`.split($/)
