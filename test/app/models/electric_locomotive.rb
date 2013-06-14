@@ -1,3 +1,0 @@
-class ElectricLocomotive < Locomotive
-
-end

@@ -1,3 +1,0 @@
-class Bicycle < WheeledVehicle
-
-end

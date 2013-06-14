@@ -1,3 +1,0 @@
-class RackLocomotive < Locomotive
-
-end

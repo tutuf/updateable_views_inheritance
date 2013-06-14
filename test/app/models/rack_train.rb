@@ -1,3 +1,0 @@
-class RackTrain < Train
-
-end
