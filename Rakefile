@@ -1,6 +1,6 @@
+require 'bundler/gem_tasks'
 require 'rake/testtask'
 require 'rdoc/task'
-require 'rake/contrib/rubyforgepublisher'
 
 desc 'Run unit tests'
 Rake::TestTask.new(:test => 'test:rebuild_database') do |t|
@@ -17,13 +17,6 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.template = ENV['template'] ? "#{ENV['template']}.rb" : './doc/template/horo'
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('./lib/**/*.rb')
-end
-
-
-desc 'Push to repo and publish docs'
-task :push => :rdoc do
-  `git push`
-  Rake::RubyForgePublisher.new('clti', 'sava_chankov').upload
 end
 
 namespace :test do
