@@ -110,7 +110,12 @@ The approach of this gem is completely independent from Rails built-in Single Ta
 If you use fixtures, you must run <tt>rake updateable_views_inheritance:fixture</tt> to generate fixture for the updateable_views_inheritance table after you add/remove
 classes from the hierarchy or change underlying table or view names. <b>Without it primary key sequence for inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b> If you don't use fixtures for the classes in the hierarchy you don't need to do that.
 
-This gem re-enables referential integrity on fixture loading, so if you are using foreign keys you will have to explicitly declare fixture load order in test_helper.rb, for
-example:
+This gem re-enables referential integrity on fixture loading. This means that 
 
-  fixtures(:roots, :trunks, :leafs, ...)
+  fixtures :all
+  
+may fail when there are foreign key constraints on tables. To fix this, explicitly declare fixture load order in <tt>test_helper.rb</tt>:
+
+  fixtures :roots, :trunks, :leafs, ...
+  
+for all fixtures you want to load.
