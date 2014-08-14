@@ -9,15 +9,19 @@ module ActiveRecord #:nodoc:
       #   default is <tt>"#{child_view}_data"</tt>
       def create_child(child_view, options)
         raise 'Please call me with a parent, for example: create_child(:steam_locomotives, :parent => :locomotives)' unless options[:parent]
+
+        schema, unqualified_child_view_name = extract_schema_and_table(child_view)
+
         parent_relation = options[:parent].to_s
         if tables.include?(parent_relation)
           parent_table = parent_relation
         else # view, interpreted as inheritance chain deeper than two levels
           parent_table = query("SELECT child_relation FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
         end
-        child_table = options[:table] || "#{child_view}_data"
-        child_table_pk = "#{child_view.singularize}_id"
-        
+
+        child_table = options[:table] || "#{schema}"."#{unqualified_child_view_name}_data"
+        child_table_pk = "#{unqualified_child_view_name.singularize}_id"
+
         create_table(child_table, :id => false) do |t|
           t.integer child_table_pk, :null => false
           yield t
