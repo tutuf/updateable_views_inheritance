@@ -1,3 +1,9 @@
+## 1.2.0 (27 August 2014)
+
+Features:
+
+  - support for PostgreSQL schemas
+
 ## 1.1.2 (14 June 2013)
 
 Bugfixes:
