@@ -1,3 +1,9 @@
+## 1.2.1 (27 August 2014)
+
+Bugfixes:
+
+  - parent relations can be in a schema
+
 ## 1.2.0 (27 August 2014)
 
 Features:

@@ -13,10 +13,10 @@ module ActiveRecord #:nodoc:
         schema, unqualified_child_view_name = Utils.extract_schema_and_table(child_view)
 
         parent_relation = options[:parent].to_s
-        if tables.include?(parent_relation)
-          parent_table = parent_relation
-        else # view, interpreted as inheritance chain deeper than two levels
+        if is_view?(parent_relation) # interpreted as inheritance chain deeper than two levels
           parent_table = query("SELECT child_relation FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
+        else
+          parent_table = parent_relation
         end
 
         child_table = options[:table] || quote_table_name("#{child_view}_data")

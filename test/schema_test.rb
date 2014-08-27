@@ -180,7 +180,12 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
   class CreateChildInSchema < ActiveRecord::Migration
     def self.up
       execute "CREATE SCHEMA interrail"
-      create_child("interrail.steam_locomotives", :parent => :locomotives) do |t|
+      create_table 'interrail.locomotives' do |t|
+        t.column :interrail_name, :string
+        t.column :interrail_max_speed, :integer
+        t.column :type, :string
+      end
+      create_child('interrail.steam_locomotives', :parent => 'interrail.locomotives') do |t|
         t.decimal :interrail_water_consumption, :precision => 6, :scale => 2
         t.decimal :interrail_coal_consumption,  :precision => 6, :scale => 2
       end
@@ -189,7 +194,12 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
 
   def test_create_child_in_schema
     CreateChildInSchema.up
-    assert_equal %w(id interrail_coal_consumption interrail_water_consumption max_speed name type),
+    assert_equal %w(id
+                    interrail_coal_consumption
+                    interrail_max_speed
+                    interrail_name
+                    interrail_water_consumption
+                    type),
                  @connection.columns('interrail.steam_locomotives').map{ |c| c.name }.sort
   end
 end
