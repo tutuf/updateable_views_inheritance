@@ -2,8 +2,8 @@
 
 Class Table Inheritance for ActiveRecord using updateable views.
 
-More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html. This gem messes very little with Rails inheritance mechanism. 
-Instead it relies on updatable views in the database to represent classes in the inheritance chain. The approach was {first suggested by John 
+More about the pattern on http://www.martinfowler.com/eaaCatalog/classTableInheritance.html. This gem messes very little with Rails inheritance mechanism.
+Instead it relies on updatable views in the database to represent classes in the inheritance chain. The approach was {first suggested by John
 Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/09/29/class-table-inheritance-in-rails-with-postgresql].
 
 
@@ -46,17 +46,17 @@ after every change to the class hierarchy. Otherwise tests may fail.
         t.column :max_speed, :integer
         t.column :type, :string
       end
-      
+
       create_child(:steam_locomotives, :parent => :locomotives) do |t|
         t.decimal :water_consumption, :precision => 6, :scale => 2
         t.decimal :coal_consumption,  :precision => 6, :scale => 2
       end
-      
+
       create_child(:electric_locomotives, :table => :raw_electric_locomotives, :parent => :locomotives)  do |t|
         t.decimal :electricity_consumption, :precision => 6, :scale => 2
       end
     end
-    
+
     def self.down
       drop_child  :steam_locomotives
       drop_child  :electric_locomotives
@@ -67,7 +67,7 @@ after every change to the class hierarchy. Otherwise tests may fail.
 And the models:
   class Locomotive
   end
-  
+
   class SteamLocomotive < Locomotive
     self.table_name =  :steam_locomotives
   end
@@ -87,7 +87,7 @@ Note that models of children classes must specify table name explicitly.
       rename_column(:name, :title)
       rebuild_parent_and_children_views(:locomotives)
     end
-  end 
+  end
 
 ===Renaming Underlying Tables
 
@@ -110,12 +110,12 @@ The approach of this gem is completely independent from Rails built-in Single Ta
 If you use fixtures, you must run <tt>rake updateable_views_inheritance:fixture</tt> to generate fixture for the updateable_views_inheritance table after you add/remove
 classes from the hierarchy or change underlying table or view names. <b>Without it primary key sequence for inheritors' tables won't be bumped to the max and it might not be possible to save objects!</b> If you don't use fixtures for the classes in the hierarchy you don't need to do that.
 
-This gem re-enables referential integrity on fixture loading. This means that 
+This gem re-enables referential integrity on fixture loading. This means that
 
   fixtures :all
-  
+
 may fail when there are foreign key constraints on tables. To fix this, explicitly declare fixture load order in <tt>test_helper.rb</tt>:
 
   fixtures :roots, :trunks, :leafs, ...
-  
+
 for all fixtures you want to load.

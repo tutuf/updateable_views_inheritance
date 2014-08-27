@@ -2,7 +2,7 @@ module ActiveRecord #:nodoc:
   module ConnectionAdapters #:nodoc:
     class PostgreSQLAdapter
       # Use this in migration to create child table and view.
-      # Options: 
+      # Options:
       # [:parent]
       #   parent relation
       # [:child_table_name]
@@ -29,10 +29,10 @@ module ActiveRecord #:nodoc:
         execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
         execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
                  REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
-        
+
         create_child_view(parent_relation, child_view, child_table)
       end
-      
+
       # Drop child view and table
       def drop_child(child_view)
         drop_view(child_view)
@@ -40,7 +40,7 @@ module ActiveRecord #:nodoc:
         drop_table(child_table)
         execute "DELETE FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(child_view)}"
       end
-      
+
       # Creates aggregate updateable view of parent and child relations. The convention for naming child tables is
       # <tt>"#{child_view}_data"</tt>. If you don't follow it, supply +child_table_name+ as third argument.
       def create_child_view(parent_table, child_view, child_table=nil)
@@ -200,7 +200,7 @@ module ActiveRecord #:nodoc:
           c = columns_hash[col.name]
           if(c && col.sql_type != c.sql_type)
             conflict_column_names << col.name
-          else 
+          else
             columns_hash[col.name] = col
           end
         end
@@ -228,7 +228,7 @@ module ActiveRecord #:nodoc:
       def supports_disable_referential_integrity?
         false
       end
-      
+
       def table_exists_with_updateable_views_inheritance_support?(name)
         is_view?(name) ? true : table_exists_without_updateable_views_inheritance_support?(name)
       end
@@ -247,12 +247,12 @@ module ActiveRecord #:nodoc:
                 end
                 @@klasses.uniq
               end
-        
+
               # Returns the class object for +table_name+
               def get_klass_for_table(table_name)
                 klass_for_tables()[table_name.to_s]
               end
-        
+
               # Returns hash with tables and thier corresponding class.
               # {table_name1 => ClassName1, ...}
               def klass_for_tables
@@ -263,7 +263,7 @@ module ActiveRecord #:nodoc:
                 end
                 @@tables_klasses
               end
-              
+
               # Returns filenames for models in the current Rails application
               def model_filenames
                 Dir.chdir("#{Rails.root}/app/models"){ Dir["**/*.rb"] }
@@ -296,7 +296,7 @@ module ActiveRecord #:nodoc:
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
             ON INSERT TO #{child_view} DO INSTEAD (
               SELECT setval('#{parent_pk_seq}', NEW.#{parent_pk});
-              INSERT INTO #{parent_table} 
+              INSERT INTO #{parent_table}
                      ( #{ [parent_pk, parent_columns].flatten.join(", ") } )
                      VALUES( currval('#{parent_pk_seq}') #{ parent_columns.empty? ? '' : ',' + parent_columns.collect{ |col| "NEW." + col}.join(",") } )
                      #{insert_returning_clause(child_view, parent_columns.unshift(parent_pk)) if supports_insert_with_returning?};
@@ -320,7 +320,7 @@ module ActiveRecord #:nodoc:
               #{ parent_columns.empty? ? '':
                  "UPDATE #{parent_table}
                      SET #{ parent_columns.collect{ |col| col + "= NEW." +col }.join(", ") }
-                     WHERE #{parent_pk} = OLD.#{parent_pk};"} 
+                     WHERE #{parent_pk} = OLD.#{parent_pk};"}
               #{ child_columns.empty? ? '':
                  "UPDATE #{child_table}
                      SET #{ child_columns.collect{ |col| col + " = NEW." +col }.join(", ") }
@@ -329,7 +329,7 @@ module ActiveRecord #:nodoc:
             )
           end_sql
         end
-        
+
         def insert_returning_clause(child_view,parent_columns)
           "RETURNING "+
           columns(child_view).map do |c|
@@ -340,7 +340,7 @@ module ActiveRecord #:nodoc:
             end
           end.join(",")
         end
-        
+
         # Set default values from the table columns for a view
         def set_defaults(view_name, table_name)
           column_definitions(table_name).each do |column_name, type, default, notnull|
@@ -376,9 +376,9 @@ module ActiveRecord #:nodoc:
             res[0] if res
           end
         end
-        
+
         # Single Table Inheritance Aggregate View
-        
+
         # Nested list for the +parent_relation+ inheritance hierarchy
         # Every descendant relation is presented as an array with relation's name as first element
         # and the other elements are the relation's children presented in the same way as lists.
@@ -398,7 +398,7 @@ module ActiveRecord #:nodoc:
           end
           hierarchy
         end
-  
+
         def get_leaves_relations(hierarchy)
           return [] if hierarchy.nil? || hierarchy.empty?
           head, hierarchy = hierarchy.first, hierarchy[1..(hierarchy.size)]
@@ -410,10 +410,10 @@ module ActiveRecord #:nodoc:
             return get_leaves_relations(hierarchy).compact
           end
         end
-  
+
         def generate_single_table_inheritanche_union_clause(rel, column_names, conflict_column_names, columns_hash, quoted_inheritance_column)
           relation_columns = columns(rel).collect{|c| c.name}
-          columns_select = column_names.inject([]) do |arr, col_name| 
+          columns_select = column_names.inject([]) do |arr, col_name|
             sql_type = conflict_column_names.include?(col_name) ? 'text' : columns_hash[col_name].sql_type
             value = "NULL::#{sql_type}"
             if(relation_columns.include?(col_name))

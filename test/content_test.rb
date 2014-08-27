@@ -11,11 +11,11 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   def teardown
     ActiveRecord::Fixtures.reset_cache
   end
-  
+
   def test_find
     locomotive =  Locomotive.find(1)
     assert locomotive.kind_of?(SteamLocomotive)
-    assert_equal %w(coal_consumption id max_speed name type water_consumption), 
+    assert_equal %w(coal_consumption id max_speed name type water_consumption),
                  locomotive.attributes.keys.sort, "Could not instantiate properly child"
   end
 
@@ -24,7 +24,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
     assert !res.rows.empty?
     assert_equal 3, res.rows.first.first.to_i
   end
-  
+
   def test_save_new
     electric_locomotive = ElectricLocomotive.new(:name=> 'BoBo', :max_speed => 40, :electricity_consumption => 12)
     assert electric_locomotive.save, "Couldn't save new"
@@ -37,14 +37,14 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
     mogul = Locomotive.find(steam_locomotive.id)
     assert mogul.kind_of?(SteamLocomotive)
   end
-  
+
   def test_update
     steam_locomotive = Locomotive.find(1)
     steam_locomotive.update_attributes( :name => 'Rocket')
     steam_locomotive.reload
     assert_equal 'Rocket', steam_locomotive.name
   end
-  
+
   def test_delete_from_parent_relation
     num_locomotives = Locomotive.count
     num_steam_locomotives = SteamLocomotive.count
@@ -52,7 +52,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
     assert_equal num_locomotives - 1, Locomotive.count
     assert_equal num_steam_locomotives - 1, SteamLocomotive.count
   end
-  
+
   def test_delete_from_child_relation
     num_locomotives = Locomotive.count
     num_steam_locomotives = SteamLocomotive.count

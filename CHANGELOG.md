@@ -9,7 +9,7 @@ Features:
 Bugfixes:
 
   - fixed generating migration on installation
-  
+
 Documentation:
 
   - README brought up to date
@@ -29,6 +29,6 @@ Features:
 ## 1.0.0 (14 September 2009)
 
 Features:
-  
+
   - class_table_inheritance plugin has behaved stably in production for a year
   - supports rails 2.1, 2.2 and 2.3
