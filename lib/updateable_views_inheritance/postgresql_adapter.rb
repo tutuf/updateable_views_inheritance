@@ -10,7 +10,7 @@ module ActiveRecord #:nodoc:
       def create_child(child_view, options)
         raise 'Please call me with a parent, for example: create_child(:steam_locomotives, :parent => :locomotives)' unless options[:parent]
 
-        schema, unqualified_child_view_name = extract_schema_and_table(child_view)
+        schema, unqualified_child_view_name = Utils.extract_schema_and_table(child_view)
 
         parent_relation = options[:parent].to_s
         if tables.include?(parent_relation)
@@ -19,7 +19,7 @@ module ActiveRecord #:nodoc:
           parent_table = query("SELECT child_relation FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
         end
 
-        child_table = options[:table] || "#{schema}"."#{unqualified_child_view_name}_data"
+        child_table = options[:table] || quote_table_name("#{child_view}_data")
         child_table_pk = "#{unqualified_child_view_name.singularize}_id"
 
         create_table(child_table, :id => false) do |t|
@@ -62,8 +62,8 @@ module ActiveRecord #:nodoc:
         make_child_view_updateable(parent_table, parent_column_names, parent_pk, parent_pk_seq, child_view, child_column_names, child_pk, child_table)
 
         # assign default values for table columns on the view - it is not automatic in Postgresql 8.1
-        set_defaults(child_view, parent_table, parent_columns)
-        set_defaults(child_view, child_table, child_columns)
+        set_defaults(child_view, parent_table)
+        set_defaults(child_view, child_table)
         create_system_table_records(parent_table, child_view, child_table)
       end
 
@@ -292,8 +292,8 @@ module ActiveRecord #:nodoc:
           # insert
           # NEW.#{parent_pk} can be explicitly specified and when it is null every call to it increments the sequence.
           # Setting the sequence to its value (explicitly supplied or the default) covers both cases.
-          execute <<-end_sql  
-            CREATE OR REPLACE RULE #{child_view}_insert AS
+          execute <<-end_sql
+            CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
             ON INSERT TO #{child_view} DO INSTEAD (
               SELECT setval('#{parent_pk_seq}', NEW.#{parent_pk});
               INSERT INTO #{parent_table} 
@@ -308,14 +308,14 @@ module ActiveRecord #:nodoc:
 
           # delete
           execute <<-end_sql
-           CREATE OR REPLACE RULE #{child_view}_delete AS
+           CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_delete")} AS
            ON DELETE TO #{child_view} DO INSTEAD
            DELETE FROM #{parent_table} WHERE #{parent_pk} = OLD.#{parent_pk}
           end_sql
 
           # update
           execute <<-end_sql
-            CREATE OR REPLACE RULE #{child_view}_update AS
+            CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_update")} AS
             ON UPDATE TO #{child_view} DO INSTEAD (
               #{ parent_columns.empty? ? '':
                  "UPDATE #{parent_table}
@@ -342,31 +342,11 @@ module ActiveRecord #:nodoc:
         end
         
         # Set default values from the table columns for a view
-        def set_defaults(view_name, table_name, columns)
-          columns.each do |column| 
-            if !(default_value = get_default_value(table_name, column.name)).nil?
-              execute("ALTER TABLE #{view_name} ALTER #{column.name} SET DEFAULT #{default_value}") 
+        def set_defaults(view_name, table_name)
+          column_definitions(table_name).each do |column_name, type, default, notnull|
+            if !default.nil?
+              execute("ALTER TABLE #{quote_table_name(view_name)} ALTER #{quote_column_name(column_name)} SET DEFAULT #{default}")
             end
-          end
-        end
-
-        # ActiveRecord::ConnectionAdapters::Column objects have nil default value for serial primary key
-        def get_default_value(table_name, column_name)
-          result = query(<<-end_sql, 'Column default value')[0]
-            SELECT pg_catalog.pg_get_expr(d.adbin, d.adrelid) as constraint
-              FROM pg_catalog.pg_attrdef d, pg_catalog.pg_attribute a, pg_catalog.pg_class c
-             WHERE d.adrelid = a.attrelid 
-               AND d.adnum = a.attnum 
-               AND a.atthasdef 
-               AND c.relname = '#{table_name}' 
-               AND a.attrelid = c.oid
-               AND a.attname = '#{column_name}'
-               AND a.attnum > 0 AND NOT a.attisdropped
-          end_sql
-          if !result.nil? && !result.empty?
-            result[0]
-          else
-            nil
           end
         end
 

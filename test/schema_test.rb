@@ -176,4 +176,20 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
   def test_table_exists
     #TODO: test table_exists? monkey patch
   end
+
+  class CreateChildInSchema < ActiveRecord::Migration
+    def self.up
+      execute "CREATE SCHEMA interrail"
+      create_child("interrail.steam_locomotives", :parent => :locomotives) do |t|
+        t.decimal :interrail_water_consumption, :precision => 6, :scale => 2
+        t.decimal :interrail_coal_consumption,  :precision => 6, :scale => 2
+      end
+    end
+  end
+
+  def test_create_child_in_schema
+    CreateChildInSchema.up
+    assert_equal %w(id interrail_coal_consumption interrail_water_consumption max_speed name type),
+                 @connection.columns('interrail.steam_locomotives').map{ |c| c.name }.sort
+  end
 end
