@@ -119,3 +119,8 @@ may fail when there are foreign key constraints on tables. To fix this, explicit
   fixtures :roots, :trunks, :leafs, ...
 
 for all fixtures you want to load.
+
+==Gem Development & Testing
+
+The gem has a comprehensive test suite. In order to run it, your user must be a superuser in PostgreSQL.
+If this is not the case, run <tt>createuser -s pesho</tt> (assuming your Unix account is <tt>pesho</tt>).
