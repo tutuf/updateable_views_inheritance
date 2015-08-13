@@ -111,7 +111,7 @@ module ActiveRecord #:nodoc:
           parent = parent_table(relation)
           pk_and_sequence_for(parent) if parent
         else
-          # log(result[0], "PK for #{relation}")
+          # log(result[0], "PK for #{relation}") {}
           [result[0], query("SELECT pg_get_serial_sequence('#{relation}', '#{result[0]}') ")[0][0]]
         end
       rescue
@@ -295,14 +295,13 @@ module ActiveRecord #:nodoc:
           execute <<-end_sql
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
             ON INSERT TO #{child_view} DO INSTEAD (
-              SELECT setval('#{parent_pk_seq}', NEW.#{parent_pk});
               INSERT INTO #{parent_table}
                      ( #{ [parent_pk, parent_columns].flatten.join(", ") } )
-                     VALUES( currval('#{parent_pk_seq}') #{ parent_columns.empty? ? '' : ',' + parent_columns.collect{ |col| "NEW." + col}.join(",") } )
-                     #{insert_returning_clause(child_view, parent_columns.unshift(parent_pk)) if supports_insert_with_returning?};
+                     VALUES( DEFAULT #{ parent_columns.empty? ? '' : ' ,' + parent_columns.collect{ |col| "NEW." + col}.join(", ") } ) ;
               INSERT INTO #{child_table}
                      ( #{ [child_pk, child_columns].flatten.join(",")} )
-                     VALUES( currval('#{parent_pk_seq}') #{ child_columns.empty? ? '' : ',' + child_columns.collect{ |col| "NEW." + col}.join(",") }  )
+                     VALUES( currval('#{parent_pk_seq}') #{ child_columns.empty? ? '' : ' ,' + child_columns.collect{ |col| "NEW." + col}.join(", ") }  )
+                     #{insert_returning_clause(parent_pk, child_pk, child_view) if supports_insert_with_returning?}
             )
           end_sql
 
@@ -330,15 +329,12 @@ module ActiveRecord #:nodoc:
           end_sql
         end
 
-        def insert_returning_clause(child_view,parent_columns)
-          "RETURNING "+
-          columns(child_view).map do |c|
-            if parent_columns.include?(c.name)
-              c.name
-            else
-              "CAST (NULL AS #{c.sql_type})"
-            end
-          end.join(",")
+        def insert_returning_clause(parent_pk, child_pk, child_view)
+          columns_cast_to_null = columns(child_view)
+                                  .reject { |c| c.name == parent_pk}
+                                  .map { |c| "CAST (NULL AS #{c.sql_type})" }
+                                  .join(", ")
+          "RETURNING #{child_pk}, #{columns_cast_to_null}"
         end
 
         # Set default values from the table columns for a view
