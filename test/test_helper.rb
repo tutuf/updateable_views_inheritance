@@ -6,7 +6,11 @@ require 'rails/test_help'
 require 'updateable_views_inheritance'
 
 begin
-  require 'ruby-debug'
+  if RUBY_VERSION > "2"
+    require 'byebug'
+  else
+    require 'debugger'
+  end
 rescue LoadError
   # no debugger available
 end
