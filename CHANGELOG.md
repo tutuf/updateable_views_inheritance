@@ -1,3 +1,9 @@
+## 1.2.2 (18 August 2015)
+
+Bugfixes:
+
+  - fixed compatibility with Rails 3.2.19+ and ActiveRecord's prepared statements
+
 ## 1.2.1 (27 August 2014)
 
 Bugfixes:

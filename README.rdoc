@@ -25,11 +25,6 @@ Run
 
 * In <tt>Gemfile</tt> add <tt>gem 'updateable_views_inheritance'</tt>
 * Run <tt>rails generate updateable_views_inheritance:install && rake db:migrate</tt>
-* In <tt>config/database.yml</tt> аdd to every environment
-
-    prepared_statements: false
-
-ActiveRecord's postgresql adapter has subtle problems with prepared statements that cause strange errors every now and then.
 * In <tt>config/environment.rb</tt> set <tt>config.active_record.schema_format = :sql</tt>
 * In case you're using fixtures, don't forget to run
 
