@@ -1,3 +1,9 @@
+## 1.3.0 (20 August 2015)
+
+Features:
+
+  - rebuild views in all inheritance chains (must be run when upgrading from <= 1.2.1)
+
 ## 1.2.2 (18 August 2015)
 
 Bugfixes:
