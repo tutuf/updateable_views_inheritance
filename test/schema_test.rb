@@ -202,4 +202,23 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
                     type),
                  @connection.columns('interrail.steam_locomotives').map{ |c| c.name }.sort
   end
+
+  class ChangeTablesInTwoInheritanceChains < ActiveRecord::Migration
+    def self.up
+      add_column(:maglev_locomotives_data, :levitation_height, :integer)
+      add_column(:bicycles_data, :wheel_size, :integer)
+      rebuild_all_parent_and_children_views
+    end
+  end
+
+  def test_rebuild_all_parent_and_children_views
+    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 7)
+    @connection.execute "DROP VIEW all_locomotives" #FIXME: single table inheritance view should be rebuilt as well
+    ChangeTablesInTwoInheritanceChains.up
+
+    assert @connection.columns(:maglev_locomotives).map{ |c| c.name }.include?('levitation_height'),
+           "Newly added column not present in view after rebuild for 1. hierarchy"
+    assert @connection.columns(:bicycles).map{ |c| c.name }.include?('wheel_size'),
+           "Newly added column not present in view after rebuild for 2. hierarchy"
+  end
 end

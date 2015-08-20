@@ -158,6 +158,12 @@ module ActiveRecord #:nodoc:
         drop_view(parent_relation) if is_view?(parent_relation)
       end
 
+      # Recreates all views in all hierarchy chains
+      def rebuild_all_parent_and_children_views
+        parent_relations = select_values('SELECT DISTINCT parent_relation FROM updateable_views_inheritance')
+        parent_relations.each { |parent_relation| rebuild_parent_and_children_views(parent_relation) }
+      end
+
       # Recreates views in the part of the hierarchy chain starting from the +parent_relation+.
       def rebuild_parent_and_children_views(parent_relation)
         # Current implementation is not very efficient - it can drop and recreate one and the same view in the bottom of the hierarchy many times.
