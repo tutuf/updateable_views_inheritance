@@ -125,7 +125,7 @@ module ActiveRecord #:nodoc:
 
       # Return the list of all views in the schema search path.
       def views(name=nil)
-        schemas = schema_search_path.split(/,/).map { |p| quote(p) }.join(',')
+        schemas = schema_search_path.split(/,\s*/).map { |p| quote(p) }.join(',')
         query(<<-SQL, name).map { |row| row[0] }
           SELECT viewname
             FROM pg_views
