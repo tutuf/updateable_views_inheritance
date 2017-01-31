@@ -124,9 +124,9 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
 
   class RenameColumnInParentTable < ActiveRecord::Migration
     def self.up
-      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
-      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :maglev_locomotives)
-      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
+      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :maglev_locomotives)
+      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
       remove_parent_and_children_views(:locomotives)
       rename_column(:locomotives, :max_speed, :maximal_speed)
       rebuild_parent_and_children_views(:locomotives)

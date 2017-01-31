@@ -5,7 +5,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 6)
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w(electric_locomotives maglev_locomotives steam_locomotives).each do |f|
-      ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
+      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
     @connection = ActiveRecord::Base.connection
   end
@@ -129,8 +129,8 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
     assert_equal %w(coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines).sort,
                  @connection.columns(:all_locomotives).map{ |c| c.name }.sort
     assert_equal 'text', @connection.columns(:all_locomotives).detect{|c| c.name == "number_of_engines"}.sql_type
-    assert_equal 'one', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{SteamLocomotive.find(:first).id}").first.first
-    assert_equal '2', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{ElectricLocomotive.find(:first).id}").first.first
+    assert_equal 'one', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{SteamLocomotive.first.id}").first.first
+    assert_equal '2', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{ElectricLocomotive.first.id}").first.first
   end
 
   def test_respond_to_missing_attributes

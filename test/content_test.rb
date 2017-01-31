@@ -6,11 +6,11 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   end
 
   def teardown
-    ActiveRecord::Fixtures.reset_cache
+    ActiveRecord::FixtureSet.reset_cache
   end
 
   def test_find
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
     locomotive =  Locomotive.find(1)
     assert locomotive.kind_of?(SteamLocomotive)
     assert_equal %w(coal_consumption id max_speed name type water_consumption),
@@ -19,8 +19,8 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
 
   def test_exec_query
     # order of fixtures is important for the test - last loaded should not be with max(id)
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
 
     res = ActiveRecord::Base.connection.exec_query(<<-SQL)
       INSERT INTO electric_locomotives (electricity_consumption, max_speed, name, type)
@@ -32,8 +32,8 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
 
   def test_exec_query_with_prepared_statement
     # order of fixtures is important for the test - last loaded should not be with max(id)
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
 
     binds = [[ElectricLocomotive.columns.find { |c| c.name == 'electricity_consumption'}, 40],
              [ElectricLocomotive.columns.find { |c| c.name == 'max_speed'},              120],
@@ -54,8 +54,8 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
 
   def test_reset_sequence_after_loading_fixture
     # order of fixtures is important for the test - last loaded should not be with max(id)
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
     steam_locomotive = SteamLocomotive.new(:name => 'Mogul', :max_speed => 120, :water_consumption => 12.3, :coal_consumption => 54.6)
     assert steam_locomotive.save
     mogul = Locomotive.find(steam_locomotive.id)
@@ -63,7 +63,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   end
 
   def test_update
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
     steam_locomotive = Locomotive.find(1)
     steam_locomotive.update_attributes( :name => 'Rocket')
     steam_locomotive.reload
@@ -71,7 +71,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   end
 
   def test_delete_from_parent_relation
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
     num_locomotives = Locomotive.count
     num_steam_locomotives = SteamLocomotive.count
     Locomotive.find(1).destroy
@@ -80,7 +80,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   end
 
   def test_delete_from_child_relation
-    ActiveRecord::Fixtures.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
+    ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
     num_locomotives = Locomotive.count
     num_steam_locomotives = SteamLocomotive.count
     SteamLocomotive.find(1).destroy

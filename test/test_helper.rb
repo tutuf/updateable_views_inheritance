@@ -5,6 +5,10 @@ require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 require 'rails/test_help'
 require 'updateable_views_inheritance'
 
+# get full stack trace on errors
+require "minitest/reporters"
+Minitest::Reporters.use!
+
 begin
   if RUBY_VERSION > "2"
     require 'byebug'
