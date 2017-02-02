@@ -9,9 +9,9 @@ Wilger}[http://web.archive.org/web/20060408145717/johnwilger.com/articles/2005/0
 
 ==Requirements
 
-Rails: 3.2.x
+Rails: 4.x
 
-Ruby: tested with 1.8.7 and 1.9.3
+Ruby: 1.9.3+
 
 Database: PostgreSQL 8.1+ only. Patches for other DBMS are welcome. Note that you are not required to use updateable views, children relations can be tables (with some triggers involved) or materialized views.
 
