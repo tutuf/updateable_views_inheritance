@@ -1,3 +1,7 @@
+## 1.4.0 (2 0 March 2017)
+
+Upgrade to Rails 4.1
+
 ## 1.4.0 (2 Feburary 2017)
 
 Upgrade to Rails 4
