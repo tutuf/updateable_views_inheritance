@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency "pg"
 
   s.add_development_dependency 'minitest'
-  s.add_development_dependency 'minitest-reporters'
   s.add_development_dependency "rails", ' ~> 4.1.16' # ">= 4.0", "< 5"
   s.add_development_dependency "bundler", "~> 1.3"
   s.add_development_dependency "rake"
