@@ -15,7 +15,7 @@ class DeepHierarchyTest < ActiveSupport::TestCase
   end
 
   def test_deeper_hierarchy
-    assert_equal [["boats"], ["railed_vehicles", ["trains", ["electric_trains", ["maglev_trains"]], ["rack_trains"], ["steam_trains"]]], ["wheeled_vehicles", ["bicycles"], ["cars"]]].sort,
+    assert_equal [["boats"], ["railed_vehicles", ["trains", ["steam_trains"], ["rack_trains"], ["electric_trains", ["maglev_trains"]]]], ["wheeled_vehicles", ["bicycles"], ["cars"]]].sort,
                   @connection.send(:get_view_hierarchy_for, :vehicles).sort
   end
 

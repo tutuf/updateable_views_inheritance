@@ -16,7 +16,7 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
 
 
   def test_content_columns
-    assert !SteamLocomotive.content_columns.include?("id")
+    assert !SteamLocomotive.content_columns.map(&:name).include?("id")
   end
 
   def test_views
