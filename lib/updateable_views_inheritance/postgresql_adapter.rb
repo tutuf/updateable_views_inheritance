@@ -84,9 +84,9 @@ module ActiveRecord #:nodoc:
             end
             if pk
               if sequence
-                select_value <<-end_sql, 'Reset sequence'
+                select_value <<~SQL, 'Reset sequence'
                   SELECT setval('#{sequence}', (SELECT COALESCE(MAX(#{pk})+(SELECT increment_by FROM #{sequence}), (SELECT min_value FROM #{sequence})) FROM #{table}), false)
-                end_sql
+                SQL
               else
                 @logger.warn "#{table} has primary key #{pk} with no default sequence" if @logger
               end
@@ -102,7 +102,7 @@ module ActiveRecord #:nodoc:
         # Returns a relation's primary key and belonging sequence. If +relation+ is a table the result is its PK and sequence.
         # When it is a view, PK and sequence of the table at the root of the inheritance chain are returned.
         def pk_and_sequence_for(relation)
-          result = query(<<-end_sql, 'PK')[0]
+          result = query(<<~SQL, 'PK')[0]
             SELECT attr.attname
               FROM pg_attribute attr,
                    pg_constraint cons
@@ -110,7 +110,7 @@ module ActiveRecord #:nodoc:
                AND cons.conrelid = '#{relation}'::regclass
                AND cons.contype  = 'p'
                AND attr.attnum   = ANY(cons.conkey)
-          end_sql
+          SQL
           if result.nil? or result.empty?
             parent = parent_table(relation)
             pk_and_sequence_for(parent) if parent
@@ -130,7 +130,7 @@ module ActiveRecord #:nodoc:
         # Return the list of all views in the schema search path.
         def views(name=nil)
           schemas = schema_search_path.split(/,\s*/).map { |p| quote(p) }.join(',')
-          query(<<-SQL, name).map { |row| row[0] }
+          query(<<~SQL, name).map { |row| row[0] }
             SELECT viewname
               FROM pg_views
              WHERE schemaname IN (#{schemas})
@@ -139,7 +139,7 @@ module ActiveRecord #:nodoc:
 
         # Checks whether relation +name+ is a view.
         def is_view?(name)
-          result = query(<<-SQL, name).map { |row| row[0] }
+          result = query(<<~SQL, name).map { |row| row[0] }
             SELECT viewname
               FROM pg_views
              WHERE viewname = '#{name}'
@@ -149,11 +149,11 @@ module ActiveRecord #:nodoc:
 
         # Recursively delete +parent_relation+ (if it is a view) and the children views the depend on it.
         def remove_parent_and_children_views(parent_relation)
-          children_views = query(<<-end_sql).map{|row| row[0]}
+          children_views = query(<<~SQL).map{|row| row[0]}
             SELECT child_aggregate_view
               FROM updateable_views_inheritance
              WHERE parent_relation = '#{parent_relation}'
-          end_sql
+          SQL
           children_views.each do |cv|
             remove_parent_and_children_views(cv)
             # drop the view only if it wasn't dropped beforehand in recursive call from other method.
@@ -172,18 +172,18 @@ module ActiveRecord #:nodoc:
         def rebuild_parent_and_children_views(parent_relation)
           # Current implementation is not very efficient - it can drop and recreate one and the same view in the bottom of the hierarchy many times.
           remove_parent_and_children_views(parent_relation)
-          children = query(<<-end_sql)
+          children = query(<<~SQL)
             SELECT parent_relation, child_aggregate_view, child_relation
               FROM updateable_views_inheritance
              WHERE parent_relation = '#{parent_relation}'
-          end_sql
+          SQL
 
           #if the parent is in the middle of the inheritance chain, it's a view that should be rebuilt as well
-          parent = query(<<-end_sql)[0]
+          parent = query(<<~SQL)[0]
             SELECT parent_relation, child_aggregate_view, child_relation
               FROM updateable_views_inheritance
              WHERE child_aggregate_view = '#{parent_relation}'
-          end_sql
+          SQL
           create_child_view(parent[0], parent[1], parent[2]) if (parent && !parent.empty?)
 
           children.each do |child|
@@ -220,11 +220,11 @@ module ActiveRecord #:nodoc:
           quoted_inheritance_column = quote_column_name(parent_klass_name.inheritance_column)
           queries = relations.map{|rel| generate_single_table_inheritanche_union_clause(rel, sorted_column_names, conflict_column_names, columns_hash, quoted_inheritance_column)}
           unioin_clauses = queries.join("\n UNION ")
-          execute <<-end_sql
+          execute <<~SQL
             CREATE VIEW #{sti_aggregate_view} AS (
               #{unioin_clauses}
             )
-          end_sql
+          SQL
         end
 
         # Recreates the Single_Table_Inheritanche-like aggregate view +sti_aggregate_view+
@@ -247,194 +247,196 @@ module ActiveRecord #:nodoc:
         module Tutuf #:nodoc:
           class ClassTableReflection
             class << self
-                # Returns all models' class objects that are ActiveRecord::Base descendants
-                def all_db_klasses
-                  return @@klasses if defined?(@@klasses)
-                  @@klasses = []
-                  # load model classes so that inheritance_column is set correctly where defined
-                  model_filenames.collect{|m| load "#{Rails.root}/app/models/#{m}";m.match(%r{([^/]+?)\.rb$})[1].camelize.constantize }.each do |klass|
-                    @@klasses << klass if  klass < ActiveRecord::Base
-                  end
-                  @@klasses.uniq
-                end
+              # Returns all models' class objects that are ActiveRecord::Base descendants
+              def all_db_klasses
+                return @@klasses if defined?(@@klasses)
 
-                # Returns the class object for +table_name+
-                def get_klass_for_table(table_name)
-                  klass_for_tables()[table_name.to_s]
+                @@klasses = []
+                # load model classes so that inheritance_column is set correctly where defined
+                model_filenames.collect{|m| load "#{Rails.root}/app/models/#{m}";m.match(%r{([^/]+?)\.rb$})[1].camelize.constantize }.each do |klass|
+                  @@klasses << klass if  klass < ActiveRecord::Base
                 end
+                @@klasses.uniq
+              end
 
-                # Returns hash with tables and thier corresponding class.
-                # {table_name1 => ClassName1, ...}
-                def klass_for_tables
-                  return @@tables_klasses if defined?(@@tables_klasses)
-                  @@tables_klasses = {}
-                  all_db_klasses.each do |klass|
-                    @@tables_klasses[klass.table_name] = klass if klass.respond_to?(:table_name)
-                  end
-                  @@tables_klasses
-                end
+              # Returns the class object for +table_name+
+              def get_klass_for_table(table_name)
+                klass_for_tables()[table_name.to_s]
+              end
 
-                # Returns filenames for models in the current Rails application
-                def model_filenames
-                  Dir.chdir("#{Rails.root}/app/models"){ Dir["**/*.rb"] }
+              # Returns hash with tables and thier corresponding class.
+              # {table_name1 => ClassName1, ...}
+              def klass_for_tables
+                return @@tables_klasses if defined?(@@tables_klasses)
+
+                @@tables_klasses = {}
+                all_db_klasses.each do |klass|
+                  @@tables_klasses[klass.table_name] = klass if klass.respond_to?(:table_name)
                 end
+                @@tables_klasses
+              end
+
+              # Returns filenames for models in the current Rails application
+              def model_filenames
+                Dir.chdir("#{Rails.root}/app/models"){ Dir["**/*.rb"] }
+              end
             end
           end
         end
 
         private
 
-          def do_create_child_view(parent_table, parent_columns, parent_pk, child_view, child_columns, child_pk, child_table)
-            view_columns = parent_columns + child_columns
-            execute <<-end_sql
-              CREATE OR REPLACE VIEW #{child_view} AS (
-                SELECT parent.#{parent_pk},
-                       #{ view_columns.join(",") }
-                  FROM #{parent_table} parent
-                       INNER JOIN #{child_table} child
-                       ON ( parent.#{parent_pk}=child.#{child_pk} )
-              )
-            end_sql
-          end
+        def do_create_child_view(parent_table, parent_columns, parent_pk, child_view, child_columns, child_pk, child_table)
+          view_columns = parent_columns + child_columns
+          execute <<~SQL
+            CREATE OR REPLACE VIEW #{child_view} AS (
+              SELECT parent.#{parent_pk},
+                     #{ view_columns.join(",") }
+                FROM #{parent_table} parent
+                     INNER JOIN #{child_table} child
+                     ON ( parent.#{parent_pk}=child.#{child_pk} )
+            )
+          SQL
+        end
 
-          # Creates rules for +INSERT+, +UPDATE+ and +DELETE+ on the view
-          def make_child_view_updateable(parent_table, parent_columns, parent_pk, parent_pk_seq, child_view, child_columns, child_pk, child_table)
-            # insert
-            # NEW.#{parent_pk} can be explicitly specified and when it is null every call to it increments the sequence.
-            # Setting the sequence to its value (explicitly supplied or the default) covers both cases.
-            execute <<-end_sql
-              CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
-              ON INSERT TO #{child_view} DO INSTEAD (
-                INSERT INTO #{parent_table}
-                       ( #{ [parent_pk, parent_columns].flatten.join(", ") } )
-                       VALUES( DEFAULT #{ parent_columns.empty? ? '' : ' ,' + parent_columns.collect{ |col| "NEW." + col}.join(", ") } ) ;
-                INSERT INTO #{child_table}
-                       ( #{ [child_pk, child_columns].flatten.join(",")} )
-                       VALUES( currval('#{parent_pk_seq}') #{ child_columns.empty? ? '' : ' ,' + child_columns.collect{ |col| "NEW." + col}.join(", ") }  )
-                       #{insert_returning_clause(parent_pk, child_pk, child_view)}
-              )
-            end_sql
+        # Creates rules for +INSERT+, +UPDATE+ and +DELETE+ on the view
+        def make_child_view_updateable(parent_table, parent_columns, parent_pk, parent_pk_seq, child_view, child_columns, child_pk, child_table)
+          # insert
+          # NEW.#{parent_pk} can be explicitly specified and when it is null every call to it increments the sequence.
+          # Setting the sequence to its value (explicitly supplied or the default) covers both cases.
+          execute <<~SQL
+            CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
+            ON INSERT TO #{child_view} DO INSTEAD (
+              INSERT INTO #{parent_table}
+                     ( #{ [parent_pk, parent_columns].flatten.join(", ") } )
+                     VALUES( DEFAULT #{ parent_columns.empty? ? '' : ' ,' + parent_columns.collect{ |col| "NEW." + col}.join(", ") } ) ;
+              INSERT INTO #{child_table}
+                     ( #{ [child_pk, child_columns].flatten.join(",")} )
+                     VALUES( currval('#{parent_pk_seq}') #{ child_columns.empty? ? '' : ' ,' + child_columns.collect{ |col| "NEW." + col}.join(", ") }  )
+                     #{insert_returning_clause(parent_pk, child_pk, child_view)}
+            )
+          SQL
 
-            # delete
-            execute <<-end_sql
-             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_delete")} AS
-             ON DELETE TO #{child_view} DO INSTEAD
-             DELETE FROM #{parent_table} WHERE #{parent_pk} = OLD.#{parent_pk}
-            end_sql
+          # delete
+          execute <<~SQL
+           CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_delete")} AS
+           ON DELETE TO #{child_view} DO INSTEAD
+           DELETE FROM #{parent_table} WHERE #{parent_pk} = OLD.#{parent_pk}
+          SQL
 
-            # update
-            execute <<-end_sql
-              CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_update")} AS
-              ON UPDATE TO #{child_view} DO INSTEAD (
-                #{ parent_columns.empty? ? '':
-                   "UPDATE #{parent_table}
-                       SET #{ parent_columns.collect{ |col| col + "= NEW." + col }.join(", ") }
-                       WHERE #{parent_pk} = OLD.#{parent_pk};"}
-                #{ child_columns.empty? ? '':
-                   "UPDATE #{child_table}
-                       SET #{ child_columns.collect{ |col| col + " = NEW." + col }.join(", ") }
-                       WHERE #{child_pk} = OLD.#{parent_pk}"
-                  }
-              )
-            end_sql
-          end
+          # update
+          execute <<~SQL
+            CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_update")} AS
+            ON UPDATE TO #{child_view} DO INSTEAD (
+              #{ parent_columns.empty? ? '':
+                 "UPDATE #{parent_table}
+                     SET #{ parent_columns.collect{ |col| col + "= NEW." + col }.join(", ") }
+                     WHERE #{parent_pk} = OLD.#{parent_pk};"}
+              #{ child_columns.empty? ? '':
+                 "UPDATE #{child_table}
+                     SET #{ child_columns.collect{ |col| col + " = NEW." + col }.join(", ") }
+                     WHERE #{child_pk} = OLD.#{parent_pk}"
+                }
+            )
+          SQL
+        end
 
-          def insert_returning_clause(parent_pk, child_pk, child_view)
-            columns_cast_to_null = columns(child_view)
-                                    .reject { |c| c.name == parent_pk}
-                                    .map { |c| "CAST (NULL AS #{c.sql_type})" }
-                                    .join(", ")
-            "RETURNING #{child_pk}, #{columns_cast_to_null}"
-          end
+        def insert_returning_clause(parent_pk, child_pk, child_view)
+          columns_cast_to_null = columns(child_view)
+                                  .reject { |c| c.name == parent_pk}
+                                  .map { |c| "CAST (NULL AS #{c.sql_type})" }
+                                  .join(", ")
+          "RETURNING #{child_pk}, #{columns_cast_to_null}"
+        end
 
-          # Set default values from the table columns for a view
-          def set_defaults(view_name, table_name)
-            column_definitions(table_name).each do |column_name, type, default, notnull|
-              if !default.nil?
-                execute("ALTER TABLE #{quote_table_name(view_name)} ALTER #{quote_column_name(column_name)} SET DEFAULT #{default}")
-              end
+        # Set default values from the table columns for a view
+        def set_defaults(view_name, table_name)
+          column_definitions(table_name).each do |column_name, type, default, notnull|
+            if !default.nil?
+              execute("ALTER TABLE #{quote_table_name(view_name)} ALTER #{quote_column_name(column_name)} SET DEFAULT #{default}")
             end
           end
+        end
 
-          def create_system_table_records(parent_relation, child_aggregate_view, child_relation)
-            parent_relation, child_aggregate_view, child_relation = [parent_relation, child_aggregate_view, child_relation].collect{|rel| quote(rel.to_s)}
-            exists = query <<-end_sql
-              SELECT parent_relation, child_aggregate_view, child_relation
+        def create_system_table_records(parent_relation, child_aggregate_view, child_relation)
+          parent_relation, child_aggregate_view, child_relation = [parent_relation, child_aggregate_view, child_relation].collect{|rel| quote(rel.to_s)}
+          exists = query <<~SQL
+            SELECT parent_relation, child_aggregate_view, child_relation
+              FROM updateable_views_inheritance
+             WHERE parent_relation      = #{parent_relation}
+               AND child_aggregate_view = #{child_aggregate_view}
+               AND child_relation       = #{child_relation}
+          SQL
+          # log "res: #{exists}"
+          if exists.nil? or exists.empty?
+            execute "INSERT INTO updateable_views_inheritance (parent_relation, child_aggregate_view, child_relation)" +
+                    "VALUES( #{parent_relation}, #{child_aggregate_view}, #{child_relation} )"
+          end
+        end
+
+        def parent_table(relation)
+          if table_exists?('updateable_views_inheritance')
+           res = query(<<~SQL, 'Parent relation')[0]
+              SELECT parent_relation
                 FROM updateable_views_inheritance
-               WHERE parent_relation      = #{parent_relation}
-                 AND child_aggregate_view = #{child_aggregate_view}
-                 AND child_relation       = #{child_relation}
-            end_sql
-            # log "res: #{exists}"
-            if exists.nil? or exists.empty?
-              execute "INSERT INTO updateable_views_inheritance (parent_relation, child_aggregate_view, child_relation)" +
-                      "VALUES( #{parent_relation}, #{child_aggregate_view}, #{child_relation} )"
-            end
+               WHERE child_aggregate_view = '#{relation}'
+            SQL
+            res[0] if res
           end
+        end
 
-          def parent_table(relation)
-            if table_exists?('updateable_views_inheritance')
-             res = query(<<-end_sql, 'Parent relation')[0]
-                SELECT parent_relation
-                  FROM updateable_views_inheritance
-                 WHERE child_aggregate_view = '#{relation}'
-              end_sql
-              res[0] if res
-            end
+        # Single Table Inheritance Aggregate View
+
+        # Nested list for the +parent_relation+ inheritance hierarchy
+        # Every descendant relation is presented as an array with relation's name as first element
+        # and the other elements are the relation's children presented in the same way as lists.
+        # For example:
+        # [[child_view1, [grandchild11,[...]], [grandchild12]],
+        #  [child_view2, [...]
+        # ]
+        def get_view_hierarchy_for(parent_relation)
+          hierarchy = []
+          children = query(<<~SQL)
+            SELECT parent_relation, child_aggregate_view, child_relation
+              FROM updateable_views_inheritance
+            WHERE parent_relation = '#{parent_relation}'
+          SQL
+          children.each do |child|
+            hierarchy << [child[1], *get_view_hierarchy_for(child[1])]
           end
+          hierarchy
+        end
 
-          # Single Table Inheritance Aggregate View
-
-          # Nested list for the +parent_relation+ inheritance hierarchy
-          # Every descendant relation is presented as an array with relation's name as first element
-          # and the other elements are the relation's children presented in the same way as lists.
-          # For example:
-          # [[child_view1, [grandchild11,[...]], [grandchild12]],
-          #  [child_view2, [...]
-          # ]
-          def get_view_hierarchy_for(parent_relation)
-            hierarchy = []
-            children = query(<<-end_sql)
-              SELECT parent_relation, child_aggregate_view, child_relation
-                FROM updateable_views_inheritance
-              WHERE parent_relation = '#{parent_relation}'
-            end_sql
-            children.each do |child|
-              hierarchy << [child[1], *get_view_hierarchy_for(child[1])]
-            end
-            hierarchy
+        def get_leaves_relations(hierarchy)
+          return [] if hierarchy.nil? || hierarchy.empty?
+          head, hierarchy = hierarchy.first, hierarchy[1..(hierarchy.size)]
+          if(head.is_a? Array)
+            return (get_leaves_relations(head) + get_leaves_relations(hierarchy)).compact
+          elsif(hierarchy.nil? || hierarchy.empty?)
+            return [head]
+          else
+            return get_leaves_relations(hierarchy).compact
           end
+        end
 
-          def get_leaves_relations(hierarchy)
-            return [] if hierarchy.nil? || hierarchy.empty?
-            head, hierarchy = hierarchy.first, hierarchy[1..(hierarchy.size)]
-            if(head.is_a? Array)
-              return (get_leaves_relations(head) + get_leaves_relations(hierarchy)).compact
-            elsif(hierarchy.nil? || hierarchy.empty?)
-              return [head]
-            else
-              return get_leaves_relations(hierarchy).compact
+        def generate_single_table_inheritanche_union_clause(rel, column_names, conflict_column_names, columns_hash, quoted_inheritance_column)
+          relation_columns = columns(rel).collect{|c| c.name}
+          columns_select = column_names.inject([]) do |arr, col_name|
+            sql_type = conflict_column_names.include?(col_name) ? 'text' : columns_hash[col_name].sql_type
+            value = "NULL::#{sql_type}"
+            if(relation_columns.include?(col_name))
+              value = col_name
+              value = "#{value}::text" if conflict_column_names.include?(col_name)
             end
+            statement = " AS #{col_name}"
+            statement = "#{value} #{statement}"
+            arr << " #{statement}"
           end
-
-          def generate_single_table_inheritanche_union_clause(rel, column_names, conflict_column_names, columns_hash, quoted_inheritance_column)
-            relation_columns = columns(rel).collect{|c| c.name}
-            columns_select = column_names.inject([]) do |arr, col_name|
-              sql_type = conflict_column_names.include?(col_name) ? 'text' : columns_hash[col_name].sql_type
-              value = "NULL::#{sql_type}"
-              if(relation_columns.include?(col_name))
-                value = col_name
-                value = "#{value}::text" if conflict_column_names.include?(col_name)
-              end
-              statement = " AS #{col_name}"
-              statement = "#{value} #{statement}"
-              arr << " #{statement}"
-            end
-            columns_select = columns_select.join(", ")
-            rel_klass_name = Tutuf::ClassTableReflection.get_klass_for_table(rel)
-            where_clause = " WHERE #{quoted_inheritance_column} = '#{rel_klass_name}'"
-            ["SELECT", columns_select, "FROM #{rel} #{where_clause}"].join(" ")
-          end
+          columns_select = columns_select.join(", ")
+          rel_klass_name = Tutuf::ClassTableReflection.get_klass_for_table(rel)
+          where_clause = " WHERE #{quoted_inheritance_column} = '#{rel_klass_name}'"
+          ["SELECT", columns_select, "FROM #{rel} #{where_clause}"].join(" ")
+        end
       end
     end
   end
