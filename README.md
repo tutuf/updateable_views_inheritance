@@ -41,13 +41,15 @@ class CtiExample < ActiveRecord::Migration
       t.column :type, :string
     end
 
-    create_child(:steam_locomotives, :parent => :locomotives) do |t|
-      t.decimal :water_consumption, :precision => 6, :scale => 2
-      t.decimal :coal_consumption,  :precision => 6, :scale => 2
+    create_child(:steam_locomotives, parent: :locomotives) do |t|
+      t.decimal :water_consumption, precision: 6, scale: 2
+      t.decimal :coal_consumption,  precision: 6, scale: 2
     end
 
-    create_child(:electric_locomotives, :table => :raw_electric_locomotives, :parent => :locomotives)  do |t|
-      t.decimal :electricity_consumption, :precision => 6, :scale => 2
+    create_child(:electric_locomotives,
+                 table: :raw_electric_locomotives, 
+                 parent: :locomotives)  do |t|
+      t.decimal :electricity_consumption, precision: 6, scale: 2
     end
   end
 
