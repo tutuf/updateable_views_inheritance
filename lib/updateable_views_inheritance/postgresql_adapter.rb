@@ -84,9 +84,9 @@ module ActiveRecord #:nodoc:
             end
             if pk
               if sequence
-                select_value <<~SQL, 'Reset sequence'
+                select_value <<-end_sql, 'Reset sequence'
                   SELECT setval('#{sequence}', (SELECT COALESCE(MAX(#{pk})+(SELECT increment_by FROM #{sequence}), (SELECT min_value FROM #{sequence})) FROM #{table}), false)
-                SQL
+                end_sql
               else
                 @logger.warn "#{table} has primary key #{pk} with no default sequence" if @logger
               end
@@ -102,7 +102,7 @@ module ActiveRecord #:nodoc:
         # Returns a relation's primary key and belonging sequence. If +relation+ is a table the result is its PK and sequence.
         # When it is a view, PK and sequence of the table at the root of the inheritance chain are returned.
         def pk_and_sequence_for(relation)
-          result = query(<<~SQL, 'PK')[0]
+          result = query(<<-end_sql, 'PK')[0]
             SELECT attr.attname
               FROM pg_attribute attr,
                    pg_constraint cons
@@ -110,7 +110,7 @@ module ActiveRecord #:nodoc:
                AND cons.conrelid = '#{relation}'::regclass
                AND cons.contype  = 'p'
                AND attr.attnum   = ANY(cons.conkey)
-          SQL
+          end_sql
           if result.nil? or result.empty?
             parent = parent_table(relation)
             pk_and_sequence_for(parent) if parent
@@ -149,11 +149,11 @@ module ActiveRecord #:nodoc:
 
         # Recursively delete +parent_relation+ (if it is a view) and the children views the depend on it.
         def remove_parent_and_children_views(parent_relation)
-          children_views = query(<<~SQL).map{|row| row[0]}
+          children_views = query(<<-end_sql).map{|row| row[0]}
             SELECT child_aggregate_view
               FROM updateable_views_inheritance
              WHERE parent_relation = '#{parent_relation}'
-          SQL
+          end_sql
           children_views.each do |cv|
             remove_parent_and_children_views(cv)
             # drop the view only if it wasn't dropped beforehand in recursive call from other method.
@@ -172,18 +172,18 @@ module ActiveRecord #:nodoc:
         def rebuild_parent_and_children_views(parent_relation)
           # Current implementation is not very efficient - it can drop and recreate one and the same view in the bottom of the hierarchy many times.
           remove_parent_and_children_views(parent_relation)
-          children = query(<<~SQL)
+          children = query(<<-end_sql)
             SELECT parent_relation, child_aggregate_view, child_relation
               FROM updateable_views_inheritance
              WHERE parent_relation = '#{parent_relation}'
-          SQL
+          end_sql
 
           #if the parent is in the middle of the inheritance chain, it's a view that should be rebuilt as well
-          parent = query(<<~SQL)[0]
+          parent = query(<<-end_sql)[0]
             SELECT parent_relation, child_aggregate_view, child_relation
               FROM updateable_views_inheritance
              WHERE child_aggregate_view = '#{parent_relation}'
-          SQL
+          end_sql
           create_child_view(parent[0], parent[1], parent[2]) if (parent && !parent.empty?)
 
           children.each do |child|
@@ -220,11 +220,11 @@ module ActiveRecord #:nodoc:
           quoted_inheritance_column = quote_column_name(parent_klass_name.inheritance_column)
           queries = relations.map{|rel| generate_single_table_inheritanche_union_clause(rel, sorted_column_names, conflict_column_names, columns_hash, quoted_inheritance_column)}
           unioin_clauses = queries.join("\n UNION ")
-          execute <<~SQL
+          execute <<-end_sql
             CREATE VIEW #{sti_aggregate_view} AS (
               #{unioin_clauses}
             )
-          SQL
+          end_sql
         end
 
         # Recreates the Single_Table_Inheritanche-like aggregate view +sti_aggregate_view+
@@ -288,7 +288,7 @@ module ActiveRecord #:nodoc:
 
         def do_create_child_view(parent_table, parent_columns, parent_pk, child_view, child_columns, child_pk, child_table)
           view_columns = parent_columns + child_columns
-          execute <<~SQL
+          execute <<-end_sql
             CREATE OR REPLACE VIEW #{child_view} AS (
               SELECT parent.#{parent_pk},
                      #{ view_columns.join(",") }
@@ -296,7 +296,7 @@ module ActiveRecord #:nodoc:
                      INNER JOIN #{child_table} child
                      ON ( parent.#{parent_pk}=child.#{child_pk} )
             )
-          SQL
+          end_sql
         end
 
         # Creates rules for +INSERT+, +UPDATE+ and +DELETE+ on the view
@@ -304,7 +304,7 @@ module ActiveRecord #:nodoc:
           # insert
           # NEW.#{parent_pk} can be explicitly specified and when it is null every call to it increments the sequence.
           # Setting the sequence to its value (explicitly supplied or the default) covers both cases.
-          execute <<~SQL
+          execute <<-end_sql
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
             ON INSERT TO #{child_view} DO INSTEAD (
               INSERT INTO #{parent_table}
@@ -315,17 +315,17 @@ module ActiveRecord #:nodoc:
                      VALUES( currval('#{parent_pk_seq}') #{ child_columns.empty? ? '' : ' ,' + child_columns.collect{ |col| "NEW." + col}.join(", ") }  )
                      #{insert_returning_clause(parent_pk, child_pk, child_view)}
             )
-          SQL
+          end_sql
 
           # delete
-          execute <<~SQL
+          execute <<-end_sql
            CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_delete")} AS
            ON DELETE TO #{child_view} DO INSTEAD
            DELETE FROM #{parent_table} WHERE #{parent_pk} = OLD.#{parent_pk}
-          SQL
+          end_sql
 
           # update
-          execute <<~SQL
+          execute <<-end_sql
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_update")} AS
             ON UPDATE TO #{child_view} DO INSTEAD (
               #{ parent_columns.empty? ? '':
@@ -338,7 +338,7 @@ module ActiveRecord #:nodoc:
                      WHERE #{child_pk} = OLD.#{parent_pk}"
                 }
             )
-          SQL
+          end_sql
         end
 
         def insert_returning_clause(parent_pk, child_pk, child_view)
@@ -376,11 +376,11 @@ module ActiveRecord #:nodoc:
 
         def parent_table(relation)
           if table_exists?('updateable_views_inheritance')
-           res = query(<<~SQL, 'Parent relation')[0]
+           res = query(<<-end_sql, 'Parent relation')[0]
               SELECT parent_relation
                 FROM updateable_views_inheritance
                WHERE child_aggregate_view = '#{relation}'
-            SQL
+            end_sql
             res[0] if res
           end
         end
@@ -396,11 +396,11 @@ module ActiveRecord #:nodoc:
         # ]
         def get_view_hierarchy_for(parent_relation)
           hierarchy = []
-          children = query(<<~SQL)
+          children = query(<<-end_sql)
             SELECT parent_relation, child_aggregate_view, child_relation
               FROM updateable_views_inheritance
             WHERE parent_relation = '#{parent_relation}'
-          SQL
+          end_sql
           children.each do |child|
             hierarchy << [child[1], *get_view_hierarchy_for(child[1])]
           end
