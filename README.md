@@ -108,6 +108,17 @@ descendants). If you want to erase a whole chain or part of chain you have to
 remove first the leaves and then their ancestors. Use `drop_child(child_view)`
 in migrations.
 
+### Using parent class without instantiating subclass
+
+If you don't want to make a second SQL query to the subclass table when you instantiate
+parent class with `Locomotive.find(1)` use
+```ruby
+class Locomotive
+  self.disable_inheritance_instantiation = true
+end
+```
+Quite handy for flat and wide class hierarchies (one parent class, many subclasses).
+
 ## Compatibility with Single Table Inheritance
 
 The approach of this gem is completely independent from Rails built-in Single
