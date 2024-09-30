@@ -47,7 +47,7 @@ class CtiExample < ActiveRecord::Migration
     end
 
     create_child(:electric_locomotives,
-                 table: :raw_electric_locomotives, 
+                 table: :raw_electric_locomotives,
                  parent: :locomotives)  do |t|
       t.decimal :electricity_consumption, precision: 6, scale: 2
     end
@@ -118,6 +118,22 @@ class Locomotive
 end
 ```
 Quite handy for flat and wide class hierarchies (one parent class, many subclasses).
+
+### Using existing table for inherited class
+
+```ruby
+class CreateIkarusBus < ActiveRecord::Migration
+  def self.up
+    # table `tbl_ikarus_buses` exists in the database
+    end
+    create_child(:ikarus_buses,
+                 table: :tbl_ikarus_buses,
+                 parent: :buses,
+                 skip_creating_child_table: true)
+  end
+end
+```
+Useful when converting legacy DB schema to use inheritance.
 
 ## Compatibility with Single Table Inheritance
 

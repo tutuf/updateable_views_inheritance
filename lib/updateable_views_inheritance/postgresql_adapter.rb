@@ -1,6 +1,5 @@
 require 'active_record/connection_adapters/postgresql/utils'
 
-
 module ActiveRecord #:nodoc:
   module ConnectionAdapters #:nodoc:
     module PostgreSQL
@@ -9,30 +8,38 @@ module ActiveRecord #:nodoc:
         # Options:
         # [:parent]
         #   parent relation
-        # [:child_table_name]
+        # [:table]
         #   default is <tt>"#{child_view}_data"</tt>
+        # [:skip_creating_child_table]
+        #   use together with :table option
         def create_child(child_view, options)
           raise 'Please call me with a parent, for example: create_child(:steam_locomotives, :parent => :locomotives)' unless options[:parent]
 
-          unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
-
           parent_relation = options[:parent].to_s
-          if is_view?(parent_relation) # interpreted as inheritance chain deeper than two levels
-            parent_table = query("SELECT child_relation FROM updateable_views_inheritance WHERE child_aggregate_view = #{quote(parent_relation)}")[0][0]
-          else
-            parent_table = parent_relation
-          end
+          parent_table =  if is_view?(parent_relation) # interpreted as inheritance chain deeper than two levels
+                            query(<<~SQL)[0][0]
+                              SELECT child_relation
+                              FROM updateable_views_inheritance
+                              WHERE child_aggregate_view = #{quote(parent_relation)}
+                            SQL
+                          else
+                            parent_relation
+                          end
 
           child_table = options[:table] || quote_table_name("#{child_view}_data")
-          child_table_pk = "#{unqualified_child_view_name.singularize}_id"
 
-          create_table(child_table, :id => false) do |t|
-            t.integer child_table_pk, :null => false
-            yield t
+          unless options.key?(:skip_creating_child_table)
+            unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
+            child_table_pk = "#{unqualified_child_view_name.singularize}_id"
+
+            create_table(child_table, :id => false) do |t|
+              t.integer child_table_pk, :null => false
+              yield t
+            end
+            execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
+            execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
+                    REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
           end
-          execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
-          execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
-                   REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
 
           create_child_view(parent_relation, child_view, child_table)
         end
@@ -234,7 +241,7 @@ module ActiveRecord #:nodoc:
           create_single_table_inheritance_view(sti_aggregate_view, parent_relation, columns_for_view)
         end
 
-        # Overriden - it must return false, otherwise deleting fixtures won't work
+        # Overriden - it solargraph-must return false, otherwise deleting fixtures won't work
         def supports_disable_referential_integrity?
           false
         end
@@ -280,6 +287,15 @@ module ActiveRecord #:nodoc:
               def model_filenames
                 Dir.chdir("#{Rails.root}/app/models"){ Dir["**/*.rb"] }
               end
+            end
+          end
+        end
+
+        # Set default values from the table columns for a view
+        def set_defaults(view_name, table_name)
+          column_definitions(table_name).each do |column_name, type, default, notnull|
+            if !default.nil?
+              execute("ALTER TABLE #{quote_table_name(view_name)} ALTER #{quote_column_name(column_name)} SET DEFAULT #{default}")
             end
           end
         end
@@ -347,15 +363,6 @@ module ActiveRecord #:nodoc:
                                   .map { |c| "CAST (NULL AS #{c.sql_type})" }
                                   .join(", ")
           "RETURNING #{child_pk}, #{columns_cast_to_null}"
-        end
-
-        # Set default values from the table columns for a view
-        def set_defaults(view_name, table_name)
-          column_definitions(table_name).each do |column_name, type, default, notnull|
-            if !default.nil?
-              execute("ALTER TABLE #{quote_table_name(view_name)} ALTER #{quote_column_name(column_name)} SET DEFAULT #{default}")
-            end
-          end
         end
 
         def create_system_table_records(parent_relation, child_aggregate_view, child_relation)

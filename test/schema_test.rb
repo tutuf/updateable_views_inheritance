@@ -221,4 +221,22 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
     assert @connection.columns(:bicycles).map{ |c| c.name }.include?('wheel_size'),
            "Newly added column not present in view after rebuild for 2. hierarchy"
   end
+
+  class UseExistingTable < ActiveRecord::Migration
+    def self.up
+      create_table :tbl_diesel_locomotives do |t|
+        t.belongs_to :locomotives
+        t.integer :num_cylinders
+      end
+      create_child(:diesel_locomotives,
+                   table: :tbl_diesel_locomotives,
+                   parent: :locomotives,
+                   skip_creating_child_table: true)
+    end
+  end
+
+  def test_skip_creating_child_table
+    UseExistingTable.up
+    assert @connection.columns(:diesel_locomotives).map(&:name).include?("num_cylinders")
+  end
 end
