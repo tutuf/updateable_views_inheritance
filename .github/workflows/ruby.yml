@@ -26,11 +26,13 @@ jobs:
           - "5432:5432"
         env:
           POSTGRES_DB: updateable_views_inheritance_test
-
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
     strategy:
       matrix:
         ruby-version: ['2.7']
-
+    env:
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/updateable_views_inheritance_test"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby
