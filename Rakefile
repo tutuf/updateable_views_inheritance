@@ -24,12 +24,12 @@ end
 namespace :test do
   desc 'Build the test database'
   task :create_database do
-    %x( createdb updateable_views_inheritance_test )
+    %x( createdb updateable_views_inheritance_test ) unless ENV['CI']
   end
 
   desc 'Drop the test database'
   task :drop_database do
-    %x( dropdb updateable_views_inheritance_test )
+    %x( dropdb updateable_views_inheritance_test ) unless ENV['CI']
   end
 
   desc 'Rebuild the test database'
