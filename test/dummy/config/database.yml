@@ -2,3 +2,4 @@ test:
   adapter: postgresql
   database: updateable_views_inheritance_test
   min_messages: ERROR
+  host: localhost
