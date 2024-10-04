@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'test_helper')
+require_relative 'test_helper'
 require 'generators/updateable_views_inheritance/install_generator'
 
 class InstallGeneratorTest < Rails::Generators::TestCase

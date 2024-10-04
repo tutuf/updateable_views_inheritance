@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'test_helper')
+require_relative 'test_helper'
 
 class UpdateableViewsInheritanceMigrationTest < ActiveSupport::TestCase
   # We use transactional fixtures - migration from the setup is rolled back by Rails on teardown
@@ -17,7 +17,7 @@ class UpdateableViewsInheritanceMigrationTest < ActiveSupport::TestCase
     assert_equal %w(electricity_consumption id max_speed name type),
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
   end
-  
+
   def test_drop_child
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 3)
     ActiveRecord::Migrator.down(File.dirname(__FILE__) + '/fixtures/migrations/', 2)

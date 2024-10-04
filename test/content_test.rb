@@ -1,10 +1,11 @@
-require File.join(File.dirname(__FILE__), 'test_helper')
+require_relative 'test_helper'
 
 class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 5)
     ActiveRecord::FixtureSet.reset_cache
   end
+
 
   def test_find
     ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
