@@ -21,10 +21,10 @@ Gem::Specification.new do |s|
   s.add_dependency "activerecord", "~> 4.2.8"
   s.add_dependency "pg", "~> 0.21"
 
-  s.add_development_dependency 'minitest'
-  s.add_development_dependency "rails", '= 4.2.11.1'
-  s.add_development_dependency "bundler"
-  s.add_development_dependency "rake"
   s.add_development_dependency 'bigdecimal', '1.3.5'
+  s.add_development_dependency "bundler"
+  s.add_development_dependency "minitest"
+  s.add_development_dependency "rails", '= 4.2.11.1'
+  s.add_development_dependency "rake"
   s.add_development_dependency "solargraph"
 end
