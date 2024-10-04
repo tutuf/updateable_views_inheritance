@@ -1,6 +1,7 @@
 .bundle/
 .byebug_history
 *.gem
+coverage
 Gemfile.lock
 html/*
 pkg/*
