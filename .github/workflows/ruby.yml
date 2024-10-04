@@ -35,6 +35,7 @@ jobs:
       DATABASE_URL: "postgres://postgres:postgres@localhost:5432/updateable_views_inheritance_test"
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Ruby
       # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
       # change this to (see https://github.com/ruby/setup-ruby#versioning):
@@ -45,8 +46,10 @@ jobs:
           # manually set bundler version for Rails 4.2
           bundler: 1.17.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
       - name: Run tests
         run: bundle exec rake
+
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
