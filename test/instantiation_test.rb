@@ -14,11 +14,11 @@ class InstantiationTest < ActiveSupport::TestCase
     ActiveRecord::FixtureSet.reset_cache
   end
 
-  class ::Locomotive < ActiveRecord::Base
+  class Locomotive < ActiveRecord::Base
     self.disable_inheritance_instantiation = true
   end
 
-  class ::ElectricLocomotive < Locomotive
+  class ElectricLocomotive < Locomotive
     self.disable_inheritance_instantiation = false
   end
 
