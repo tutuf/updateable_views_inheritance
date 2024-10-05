@@ -8,18 +8,14 @@ class InstantiationTest < ActiveSupport::TestCase
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
     @connection = ActiveRecord::Base.connection
+
+    Locomotive.disable_inheritance_instantiation = true
+    ElectricLocomotive.disable_inheritance_instantiation = false
   end
 
   def teardown
+    Locomotive.disable_inheritance_instantiation = false
     ActiveRecord::FixtureSet.reset_cache
-  end
-
-  class Locomotive < ActiveRecord::Base
-    self.disable_inheritance_instantiation = true
-  end
-
-  class ElectricLocomotive < Locomotive
-    self.disable_inheritance_instantiation = false
   end
 
   def test_setting_disable_inheritance_instantiation_does_not_load_child_columns
@@ -35,6 +31,5 @@ class InstantiationTest < ActiveSupport::TestCase
   def test_disable_inheritance_instantiatioon_not_set_loads_child_attributes
     assert_equal %w[id name number_of_gears number_of_wheels vehicle_type],
                  Bicycle.first.attributes.keys.sort
-
   end
 end
