@@ -3,12 +3,11 @@ ENV["RAILS_ENV"] = "test"
 
 # test coverage
 require 'simplecov'
-require 'simplecov-lcov'
+require 'simplecov_json_formatter'
 
-SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
 SimpleCov.start 'rails' do
   if ENV['CI']
-    formatter SimpleCov::Formatter::LcovFormatter
+    formatter SimpleCov::Formatter::JSONFormatter
   else
     formatter SimpleCov::Formatter::MultiFormatter.new([
       SimpleCov::Formatter::SimpleFormatter,
