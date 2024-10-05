@@ -1,5 +1,7 @@
 # Class Table Inheritance
 
+[![codecov](https://codecov.io/github/tutuf/updateable_views_inheritance/graph/badge.svg?token=L8P5LYNNU4)](https://codecov.io/github/tutuf/updateable_views_inheritance)
+
 Class Table Inheritance for ActiveRecord using updateable views
 
 More about the pattern on
