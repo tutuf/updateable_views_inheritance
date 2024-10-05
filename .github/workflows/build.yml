@@ -48,7 +48,7 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run tests
-        run: bundle exec rake
+        run: bundle exec rake 2>/dev/null # disable warnings until ruby 3 upgrade
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
