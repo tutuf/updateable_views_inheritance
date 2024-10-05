@@ -5,16 +5,16 @@ require "rspec"
 
 describe "Insert returning on view with rules and default value" do
   before(:each) do
-    @conn = PG.connect(dbname: 'updateable_views_inheritance_test')
-    @conn.exec(%q{ SET client_min_messages TO 'ERROR' })
+    @conn = PG.connect(dbname: "updateable_views_inheritance_test")
+    @conn.exec(" SET client_min_messages TO 'ERROR' ")
 
-    @conn.exec(%q{ CREATE TABLE parent ( id SERIAL PRIMARY KEY,
-                                         name TEXT) })
-    @conn.exec(%q{ CREATE TABLE child ( parent_id INTEGER PRIMARY KEY REFERENCES parent(id),
-                                        surname TEXT) })
+    @conn.exec(' CREATE TABLE parent ( id SERIAL PRIMARY KEY,
+                                         name TEXT) ')
+    @conn.exec(' CREATE TABLE child ( parent_id INTEGER PRIMARY KEY REFERENCES parent(id),
+                                        surname TEXT) ')
 
-    @conn.exec(%q{ CREATE VIEW v AS (SELECT id, name, surname FROM parent JOIN child ON parent.id=child.parent_id) })
-    @conn.exec(%q{ ALTER VIEW v ALTER id SET DEFAULT nextval('parent_id_seq'::regclass) })
+    @conn.exec(" CREATE VIEW v AS (SELECT id, name, surname FROM parent JOIN child ON parent.id=child.parent_id) ")
+    @conn.exec(" ALTER VIEW v ALTER id SET DEFAULT nextval('parent_id_seq'::regclass) ")
     #
     # The old way that didn't return anything when binds are empty
     #
@@ -28,30 +28,30 @@ describe "Insert returning on view with rules and default value" do
     #
     #               )
     #             })
-    @conn.exec(%q{ CREATE RULE v_on_insert AS ON INSERT TO v DO INSTEAD
+    @conn.exec(" CREATE RULE v_on_insert AS ON INSERT TO v DO INSTEAD
                   (
                     INSERT INTO parent (id, name)
                       VALUES( DEFAULT, NEW.name );
                     INSERT INTO child  (parent_id, surname)
                       VALUES( currval('parent_id_seq'), NEW.surname ) RETURNING parent_id, NULL::text, NULL::te;
                   )
-                })
+                ")
 
-    @sql = %q{ INSERT INTO v (name, surname) VALUES ('parent', 'child') RETURNING id}
+    @sql = " INSERT INTO v (name, surname) VALUES ('parent', 'child') RETURNING id"
   end
 
   after(:each) do
-    @conn.exec(%q{ DROP VIEW IF EXISTS v })
-    @conn.exec(%q{ DROP TABLE IF EXISTS parent CASCADE})
-    @conn.exec(%q{ DROP TABLE IF EXISTS child CASCADE})
+    @conn.exec(" DROP VIEW IF EXISTS v ")
+    @conn.exec(" DROP TABLE IF EXISTS parent CASCADE")
+    @conn.exec(" DROP TABLE IF EXISTS child CASCADE")
   end
 
-  it 'async exec with empty binds' do
+  it "async exec with empty binds" do
     res = @conn.async_exec(@sql, [])
     expect(res.values).to eq([["1"]])
   end
 
-  it 'async exec with no binds' do
+  it "async exec with no binds" do
     res = @conn.async_exec(@sql)
     expect(res.values).to eq([["1"]])
   end

@@ -1,3 +1,3 @@
 class SteamLocomotive < Locomotive
-  self.table_name =  'steam_locomotives'
+  self.table_name = "steam_locomotives"
 end
