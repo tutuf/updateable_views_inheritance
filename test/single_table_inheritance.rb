@@ -1,19 +1,19 @@
-require_relative 'test_helper'
+require_relative "test_helper"
 
 class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 6)
+    ActiveRecord::Migrator.up(File.dirname(__FILE__) + "/fixtures/migrations/", 6)
     # order of fixtures is important for the test - last loaded should not be with max(id)
-    %w(electric_locomotives maglev_locomotives steam_locomotives).each do |f|
-      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
+    %w[electric_locomotives maglev_locomotives steam_locomotives].each do |f|
+      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + "/fixtures/", f)
     end
     @connection = ActiveRecord::Base.connection
   end
 
   def test_single_table_inheritance_view_schema
     @connection = ActiveRecord::Base.connection
-    assert_equal %w(coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
+    assert_equal %w[coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
   end
 
   def test_single_table_inheritance_records_number
@@ -25,7 +25,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
   end
 
   def test_single_table_inheritance_save
-    electric_locomotive = ElectricLocomotive.new(:name=> 'BoBo', :max_speed => 40, :electricity_consumption => 12)
+    electric_locomotive = ElectricLocomotive.new(name: "BoBo", max_speed: 40, electricity_consumption: 12)
     assert electric_locomotive.save
     assert_equal electric_locomotive.name, @connection.query("SELECT name FROm all_locomotives WHERE id=#{electric_locomotive.id}").first.first
   end
@@ -41,8 +41,8 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_view_add_column_to_parent_table
     AddColumnToParentTable.up
-    assert_equal %w(coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
+    assert_equal %w[coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
   end
 
   class RemoveColumnInParentTable < ActiveRecord::Migration
@@ -51,14 +51,14 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
       remove_parent_and_children_views(:locomotives)
       remove_column(:locomotives, :max_speed)
       rebuild_parent_and_children_views(:locomotives)
-      create_single_table_inheritance_view(:all_locomotives,:locomotives)
+      create_single_table_inheritance_view(:all_locomotives, :locomotives)
     end
   end
 
   def test_single_table_inheritance_view_remove_column_parent_table
     RemoveColumnInParentTable.up
-    assert_equal %w(coal_consumption id name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
+    assert_equal %w[coal_consumption id name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
   end
 
   class RenameColumnInParentTable < ActiveRecord::Migration
@@ -73,8 +73,8 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_view_rename_column_parent_table
     RenameColumnInParentTable.up
-    assert_equal %w(coal_consumption id maximal_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
+    assert_equal %w[coal_consumption id maximal_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
   end
 
   class ChangeChildRelationView < ActiveRecord::Migration
@@ -89,8 +89,8 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_view_change_child_relation_view
     ChangeChildRelationView.up
-    assert_equal %w(coal_consumption id max_speed name type water_consumption electric_consumption bidirectional narrow_gauge magnetic_field rail_system).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
+    assert_equal %w[coal_consumption id max_speed name type water_consumption electric_consumption bidirectional narrow_gauge magnetic_field rail_system].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
   end
 
   class ConflictColumns < ActiveRecord::Migration
@@ -106,9 +106,9 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_view_conflict_columns
     ConflictColumns.up
-    assert_equal %w(coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
-    assert_equal 'text', @connection.columns(:all_locomotives).detect{|c| c.name == "number_of_engines"}.sql_type
+    assert_equal %w[coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
+    assert_equal "text", @connection.columns(:all_locomotives).detect { |c| c.name == "number_of_engines" }.sql_type
   end
 
   class ConflictColumnsWithValues < ActiveRecord::Migration
@@ -126,11 +126,11 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_view_conflict_columns_with_values
     ConflictColumnsWithValues.up
-    assert_equal %w(coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines).sort,
-                 @connection.columns(:all_locomotives).map{ |c| c.name }.sort
-    assert_equal 'text', @connection.columns(:all_locomotives).detect{|c| c.name == "number_of_engines"}.sql_type
-    assert_equal 'one', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{SteamLocomotive.first.id}").first.first
-    assert_equal '2', @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{ElectricLocomotive.first.id}").first.first
+    assert_equal %w[coal_consumption id max_speed name type water_consumption electricity_consumption bidirectional narrow_gauge magnetic_field rail_system number_of_engines].sort,
+      @connection.columns(:all_locomotives).map { |c| c.name }.sort
+    assert_equal "text", @connection.columns(:all_locomotives).detect { |c| c.name == "number_of_engines" }.sql_type
+    assert_equal "one", @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{SteamLocomotive.first.id}").first.first
+    assert_equal "2", @connection.query("SELECT number_of_engines FROM all_locomotives WHERE id=#{ElectricLocomotive.first.id}").first.first
   end
 
   def test_respond_to_missing_attributes
