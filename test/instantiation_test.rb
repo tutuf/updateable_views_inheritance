@@ -19,6 +19,9 @@ class InstantiationTest < ActiveSupport::TestCase
   end
 
   def test_setting_disable_inheritance_instantiation_does_not_load_child_columns
+    unless Locomotive.first
+      puts "num locomotives:", @connection.select_one("SELECT count(id) FROM locomotives")
+    end
     assert_equal %w[id max_speed name type],
                  Locomotive.first.attributes.keys.sort
   end
