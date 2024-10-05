@@ -1,6 +1,7 @@
 # Class Table Inheritance
 
-[![codecov](https://codecov.io/github/tutuf/updateable_views_inheritance/graph/badge.svg?token=L8P5LYNNU4)](https://codecov.io/github/tutuf/updateable_views_inheritance)
+[![Build](https://github.com/tutuf/updateable_views_inheritance/actions/workflows/build.yml/badge.svg)](https://github.com/tutuf/updateable_views_inheritance/actions?query=workflow:build)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=tutuf_updateable_views_inheritance&metric=coverage)](https://sonarcloud.io/summary/new_code?id=tutuf_updateable_views_inheritance)
 
 Class Table Inheritance for ActiveRecord using updateable views
 
