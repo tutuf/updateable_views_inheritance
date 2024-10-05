@@ -3,5 +3,6 @@ version = 1
 [[analyzers]]
 name = "ruby"
 
-[[transformers]]
-name = "standardrb"
+[[analyzers]]
+name = "test-coverage"
+enabled = true

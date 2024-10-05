@@ -52,13 +52,15 @@ jobs:
         run: bundle exec rake 2>/dev/null # disable warnings until ruby 3 upgrade
 
       # From https://stackoverflow.com/questions/74199483/sonarcloud-ci-cant-find-source-files-for-ruby-simplecov-coverage
-      - name: Fix code coverage paths for SonarCloud
+      - name: Fix code coverage paths for DeepSource
         working-directory: ./coverage
         run: |
-          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
+          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' .resultset.json
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Report test coverage to DeepSource
+        uses: deepsourcelabs/test-coverage-action@master
+        with:
+          key: ruby
+          coverage-file: ./coverage/.resultset.json
+          dsn: ${{ secrets.DEEPSOURCE_DSN }}
+
