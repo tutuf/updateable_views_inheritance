@@ -16,8 +16,10 @@ SimpleCov.start 'rails' do
   end
 
   track_files "lib/**/*.rb"
-  add_filter "/lib/generators/updateable_views_inheritance/templates/create_updateable_views_inheritance.rb"
-  add_filter "/lib/updateable_views_inheritance/version.rb"
+  # repeat the add_filter values in sonar-project.properties file
+  # otherwise sonarcloud does not calculate properly the coverage ratio
+  add_filter "lib/generators/updateable_views_inheritance/templates/create_updateable_views_inheritance.rb"
+  add_filter "lib/updateable_views_inheritance/version.rb"
 end
 
 require File.expand_path("../dummy/config/environment.rb",  __FILE__)
