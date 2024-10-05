@@ -1,0 +1,6 @@
+{
+  "sonarlint.connectedMode.project": {
+    "connectionId": "tutuf",
+    "projectKey": "tutuf_updateable_views_inheritance"
+  }
+}
