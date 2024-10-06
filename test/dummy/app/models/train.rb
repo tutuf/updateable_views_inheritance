@@ -1,3 +1,3 @@
 class Train < RailedVehicle
-  self.table_name =  'trains'
+  self.table_name = "trains"
 end

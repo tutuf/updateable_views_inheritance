@@ -1,5 +1,5 @@
-require_relative 'test_helper'
-require 'generators/updateable_views_inheritance/install_generator'
+require_relative "test_helper"
+require "generators/updateable_views_inheritance/install_generator"
 
 class InstallGeneratorTest < Rails::Generators::TestCase
   destination File.join(Rails.root, "tmp")
@@ -8,6 +8,6 @@ class InstallGeneratorTest < Rails::Generators::TestCase
 
   test "create migration" do
     run_generator
-    assert_migration 'db/migrate/create_updateable_views_inheritance.rb'
+    assert_migration "db/migrate/create_updateable_views_inheritance.rb"
   end
 end

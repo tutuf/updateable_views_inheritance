@@ -2,11 +2,11 @@
 ENV["RAILS_ENV"] = "test"
 
 # test coverage
-require 'simplecov'
-require 'simplecov_json_formatter'
+require "simplecov"
+require "simplecov_json_formatter"
 
-SimpleCov.start 'rails' do
-  if ENV['CI']
+SimpleCov.start "rails" do
+  if ENV["CI"]
     formatter SimpleCov::Formatter::JSONFormatter
   else
     formatter SimpleCov::Formatter::MultiFormatter.new([
@@ -22,21 +22,21 @@ SimpleCov.start 'rails' do
   add_filter "lib/updateable_views_inheritance/version.rb"
 end
 
-require File.expand_path("../dummy/config/environment.rb",  __FILE__)
-require 'rails/test_help'
-require 'updateable_views_inheritance'
+require File.expand_path("../dummy/config/environment.rb", __FILE__)
+require "rails/test_help"
+require "updateable_views_inheritance"
 
 begin
   if RUBY_VERSION > "2"
-    require 'byebug'
+    require "byebug"
   else
-    require 'debugger'
+    require "debugger"
   end
 rescue LoadError
   # no debugger available
 end
 
-class ActiveSupport::TestCase #:nodoc:
+class ActiveSupport::TestCase # :nodoc:
   include ActiveRecord::TestFixtures
   self.fixture_path = "#{File.dirname(__FILE__)}/fixtures/"
   ActiveRecord::Migration.verbose = false
