@@ -1,3 +1,9 @@
+## 1.4.4 (09 October 2024)
+
+Bugfixes:
+
+  - Quote table and column names.
+
 ## 1.4.3 (01 October 2024)
 
 Features:
