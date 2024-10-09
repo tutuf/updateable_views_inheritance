@@ -364,9 +364,9 @@ module ActiveRecord #:nodoc:
 
         def insert_returning_clause(parent_pk, child_pk, child_view)
           columns_cast_to_null = columns(child_view)
-                                  .reject { |c| c.name == parent_pk}
-                                  .map { |c| "CAST (NULL AS #{c.sql_type})" }
-                                  .join(", ")
+                                 .reject { |c| c.name == parent_pk }
+                                 .map { |c| "CAST (NULL AS #{c.sql_type})" }
+                                 .join(", ")
           "RETURNING #{child_pk}, #{columns_cast_to_null}"
         end
 

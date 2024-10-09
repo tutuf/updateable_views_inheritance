@@ -184,22 +184,22 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
         t.column :interrail_max_speed, :integer
         t.column :type, :string
       end
-      create_child('interrail.steam_locomotives', :parent => 'interrail.locomotives') do |t|
-        t.decimal :interrail_water_consumption, :precision => 6, :scale => 2
-        t.decimal :interrail_coal_consumption,  :precision => 6, :scale => 2
+      create_child('interrail.steam_locomotives', parent: 'interrail.locomotives') do |t|
+        t.decimal :interrail_water_consumption, precision: 6, scale: 2
+        t.decimal :interrail_coal_consumption,  precision: 6, scale: 2
       end
     end
   end
 
   def test_create_child_in_schema
     CreateChildInSchema.up
-    assert_equal %w(id
+    assert_equal %w[id
                     interrail_coal_consumption
                     interrail_max_speed
                     interrail_name
                     interrail_water_consumption
-                    type),
-                 @connection.columns('interrail.steam_locomotives').map{ |c| c.name }.sort
+                    type],
+                 @connection.columns('interrail.steam_locomotives').map(&:name).sort
   end
 
   class ChangeTablesInTwoInheritanceChains < ActiveRecord::Migration
