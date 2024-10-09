@@ -305,7 +305,7 @@ module ActiveRecord #:nodoc:
         def do_create_child_view(parent_table, parent_columns, parent_pk, child_view, child_columns, child_pk, child_table)
           view_columns = parent_columns + child_columns
           execute(<<~SQL)
-            CREATE OR REPLACE VIEW #{quote_column_name(child_view)} AS (
+            CREATE OR REPLACE VIEW #{quote_table_name(child_view)} AS (
               SELECT parent.#{parent_pk},
                      #{ view_columns.map { |col| quote_column_name(col) }.join(",") }
                 FROM #{parent_table} parent
@@ -322,7 +322,7 @@ module ActiveRecord #:nodoc:
           # Setting the sequence to its value (explicitly supplied or the default) covers both cases.
           execute(<<~SQL)
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_insert")} AS
-            ON INSERT TO #{quote_column_name(child_view)} DO INSTEAD (
+            ON INSERT TO #{quote_table_name(child_view)} DO INSTEAD (
               INSERT INTO #{parent_table}
                      ( #{ [parent_pk, parent_columns].flatten.map { |col| quote_column_name(col) }.join(", ") } )
                      VALUES( DEFAULT #{ parent_columns.empty? ? '' : ' ,' + parent_columns.collect{ |col| "NEW.#{quote_column_name(col)}" }.join(", ") } ) ;
@@ -336,14 +336,14 @@ module ActiveRecord #:nodoc:
           # delete
           execute(<<~SQL)
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_delete")} AS
-            ON DELETE TO #{quote_column_name(child_view)} DO INSTEAD
+            ON DELETE TO #{quote_table_name(child_view)} DO INSTEAD
             DELETE FROM #{parent_table} WHERE #{parent_pk} = OLD.#{parent_pk}
           SQL
 
           # update
           execute(<<~SQL)
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_update")} AS
-            ON UPDATE TO #{quote_column_name(child_view)} DO INSTEAD (
+            ON UPDATE TO #{quote_table_name(child_view)} DO INSTEAD (
               #{ if parent_columns.empty?
                    ''
                  else
