@@ -14,7 +14,6 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
     assert_equal 'id', @connection.primary_key(:maglev_locomotives), "Wrong or no primary key for child aggregate view"
   end
 
-
   def test_content_columns
     assert !SteamLocomotive.content_columns.map(&:name).include?("id")
   end
@@ -238,5 +237,18 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
   def test_skip_creating_child_table
     UseExistingTable.up
     assert @connection.columns(:diesel_locomotives).map(&:name).include?("num_cylinders")
+  end
+
+  class ReservedSQLWords < ActiveRecord::Migration
+    def self.up
+      create_child(:table, parent: :locomotives) do |t|
+        t.integer :column
+      end
+    end
+  end
+
+  def test_reserved_words_in_tables_and_columns
+    ReservedSQLWords.up
+    assert @connection.columns(:table).map(&:name).include?("column")
   end
 end
