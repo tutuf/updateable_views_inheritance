@@ -1,4 +1,4 @@
-## 1.4.4 (09 October 2024)
+## 1.4.5 (09 October 2024)
 
 Bugfixes:
 
