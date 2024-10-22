@@ -80,6 +80,10 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
     assert RackLocomotive.new.narrow_gauge
   end
 
+  def test_does_not_preserve_not_null_on_views
+    assert SteamLocomotive.columns.find { |c| c.name == 'water_consumption' }.null
+  end
+
   class ChangeDefaultValueOfColumn < ActiveRecord::Migration
     def self.up
       remove_parent_and_children_views(:rack_locomotives)

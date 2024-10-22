@@ -6,9 +6,9 @@ class CreateWithDefaultTable < ActiveRecord::Migration
       t.column :type, :string
     end
     
-    create_child(:steam_locomotives, :parent => :locomotives) do |t|
-      t.decimal :water_consumption, :precision => 6, :scale => 2
-      t.decimal :coal_consumption,  :precision => 6, :scale => 2
+    create_child(:steam_locomotives, parent: :locomotives) do |t|
+      t.decimal :water_consumption, precision: 6, scale: 2, null: false
+      t.decimal :coal_consumption,  precision: 6, scale: 2, null: false
     end
   end
   
