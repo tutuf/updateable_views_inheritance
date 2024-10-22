@@ -138,6 +138,31 @@ end
 ```
 Useful when converting legacy DB schema to use inheritance.
 
+### Using view as a child table
+
+```ruby
+      execute <<-SQL.squish
+        CREATE VIEW punk_locomotives_data AS (
+          SELECT steam_locomotives.id,
+                 steam_locomotives.coal_consumption AS coal,
+                 NULL AS electro
+          FROM steam_locomotives
+          UNION ALL
+          SELECT electric_locomotives.id,
+                 NULL AS coal,
+                 electric_locomotives.electricity_consumption AS electro
+          FROM electric_locomotives)
+      SQL
+      create_child(:punk_locomotives,
+                   { parent: :locomotives,
+                     child_table: :punk_locomotives_data,
+                     child_table_pk: :id,
+                     skip_creating_child_table: true })
+```
+Views in PostgreSQL cannot have primary keys, so you have to manually specify it
+when you use. Note that views also cannot have `NOT NULL` constraints, although
+the `NOT NULL` constraint of the underlying table will still be enforced.
+
 ## Compatibility with Single Table Inheritance
 
 The approach of this gem is completely independent from Rails built-in Single

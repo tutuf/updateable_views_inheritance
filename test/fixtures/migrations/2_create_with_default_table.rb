@@ -5,13 +5,13 @@ class CreateWithDefaultTable < ActiveRecord::Migration
       t.column :max_speed, :integer
       t.column :type, :string
     end
-    
+
     create_child(:steam_locomotives, parent: :locomotives) do |t|
       t.decimal :water_consumption, precision: 6, scale: 2, null: false
       t.decimal :coal_consumption,  precision: 6, scale: 2, null: false
     end
   end
-  
+
   def self.down
     drop_child :steam_locomotives
     drop_table :locomotives

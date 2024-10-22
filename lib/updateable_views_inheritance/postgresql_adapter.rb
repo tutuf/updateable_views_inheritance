@@ -7,11 +7,16 @@ module ActiveRecord #:nodoc:
         # Use this in migration to create child table and view.
         # Options:
         # [:parent]
-        #   parent relation
+        #   Parent relation
         # [:table]
-        #   default is <tt>"#{child_view}_data"</tt>
+        #   Deprecated. Use :child_table instead
+        # [:child_table]
+        #   Default is <tt>"#{child_view}_data"</tt>
+        # [:child_table_pk]
+        #   Handy when :child_table is a view and PK cannot be inferred
+        #   from the database.
         # [:skip_creating_child_table]
-        #   use together with :table option
+        #   When given, :child_table option also must be specified
         def create_child(child_view, options)
           raise 'Please call me with a parent, for example: create_child(:steam_locomotives, :parent => :locomotives)' unless options[:parent]
 
@@ -26,7 +31,7 @@ module ActiveRecord #:nodoc:
                             parent_relation
                           end
 
-          child_table = options[:table] || quote_table_name("#{child_view}_data")
+          child_table = options[:child_table] || options[:table] || quote_table_name("#{child_view}_data")
 
           unless options.key?(:skip_creating_child_table)
             unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
@@ -41,7 +46,9 @@ module ActiveRecord #:nodoc:
                     REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
           end
 
-          create_child_view(parent_relation, child_view, child_table)
+          child_table_pk ||= options[:child_table_pk].to_s if options[:child_table_pk]
+
+          create_child_view(parent_relation, child_view, child_table, child_table_pk)
         end
 
         # Drop child view and table
@@ -54,7 +61,7 @@ module ActiveRecord #:nodoc:
 
         # Creates aggregate updateable view of parent and child relations. The convention for naming child tables is
         # <tt>"#{child_view}_data"</tt>. If you don't follow it, supply +child_table_name+ as third argument.
-        def create_child_view(parent_table, child_view, child_table=nil)
+        def create_child_view(parent_table, child_view, child_table=nil, child_table_pk=nil)
           child_table ||= child_view.to_s + "_data"
 
           parent_columns = columns(parent_table)
@@ -63,7 +70,7 @@ module ActiveRecord #:nodoc:
           child_column_names = child_columns.collect{|c| c.name}
           parent_column_names = parent_columns.collect{|c| c.name}
 
-          child_pk = pk_and_sequence_for(child_table)[0]
+          child_pk = child_table_pk || pk_and_sequence_for(child_table)[0]
           child_column_names.delete(child_pk)
 
           parent_pk, parent_pk_seq = pk_and_sequence_for(parent_table)
@@ -106,10 +113,12 @@ module ActiveRecord #:nodoc:
           res && res.first
         end
 
-        # Returns a relation's primary key and belonging sequence. If +relation+ is a table the result is its PK and sequence.
-        # When it is a view, PK and sequence of the table at the root of the inheritance chain are returned.
+        # Returns a relation's primary key and belonging sequence.
+        # If +relation+ is a table the result is its PK and sequence.
+        # When it is a view, PK and sequence of the table at the root
+        # of the inheritance chain are returned.
         def pk_and_sequence_for(relation)
-          result = query(<<-SQL, 'PK')[0]
+          result = query(<<-SQL.squish, 'PK')[0]
             SELECT attr.attname
               FROM pg_attribute attr,
                    pg_constraint cons
@@ -118,15 +127,13 @@ module ActiveRecord #:nodoc:
                AND cons.contype  = 'p'
                AND attr.attnum   = ANY(cons.conkey)
           SQL
-          if result.nil? or result.empty?
+          if result.blank? #result.empty?
             parent = parent_table(relation)
             pk_and_sequence_for(parent) if parent
           else
             # log(result[0], "PK for #{relation}") {}
             [result[0], query("SELECT pg_get_serial_sequence('#{relation}', '#{result[0]}') ")[0][0]]
           end
-        rescue
-          nil
         end
 
         # Drops a view from the database.

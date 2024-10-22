@@ -255,4 +255,31 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
     ReservedSQLWords.up
     assert @connection.columns(:table).map(&:name).include?("column")
   end
+
+  class ChildTableIsActuallyView < ActiveRecord::Migration
+    def self.up
+      execute <<-SQL.squish
+        CREATE VIEW punk_locomotives_data AS (
+          SELECT steam_locomotives.id,
+                 steam_locomotives.coal_consumption AS coal,
+                 NULL AS electro
+          FROM steam_locomotives
+          UNION ALL
+          SELECT electric_locomotives.id,
+                 NULL AS coal,
+                 electric_locomotives.electricity_consumption AS electro
+          FROM electric_locomotives)
+      SQL
+      create_child(:punk_locomotives,
+                   { parent: :locomotives,
+                     child_table: :punk_locomotives_data,
+                     child_table_pk: :id,
+                     skip_creating_child_table: true })
+    end
+  end
+
+  def test_child_table_is_view
+    ChildTableIsActuallyView.up
+    assert @connection.columns(:punk_locomotives).map(&:name).sort == %w(coal electro id max_speed name type)
+  end
 end
