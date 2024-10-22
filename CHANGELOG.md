@@ -1,3 +1,9 @@
+## 1.4.6 (22 October 2024)
+
+Features:
+
+  - Add option for child primary key.
+
 ## 1.4.5 (09 October 2024)
 
 Bugfixes:
