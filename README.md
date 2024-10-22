@@ -1,7 +1,8 @@
 # Class Table Inheritance
 
 [![Build](https://github.com/tutuf/updateable_views_inheritance/actions/workflows/build.yml/badge.svg)](https://github.com/tutuf/updateable_views_inheritance/actions?query=workflow:build)
-[![Coverage](https://app.deepsource.com/gh/tutuf/updateable_views_inheritance.svg/?label=code+coverage&show_trend=true&token=AMfm8-_-qDZoknMh9-8IYp3R)](https://app.deepsource.com/gh/tutuf/updateable_views_inheritance/)
+[![Codecov](https://codecov.io/gh/tutuf/updateable_views_inheritance/graph/badge.svg?token=L8P5LYNNU4)](https://codecov.io/gh/tutuf/updateable_views_inheritance)
+[![DeepSource](https://app.deepsource.com/gh/tutuf/updateable_views_inheritance.svg/?label=active+issues&show_trend=true&token=AMfm8-_-qDZoknMh9-8IYp3R)](https://app.deepsource.com/gh/tutuf/updateable_views_inheritance/)
 
 Class Table Inheritance for ActiveRecord using updateable views
 
