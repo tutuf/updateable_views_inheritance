@@ -37,8 +37,8 @@ module ActiveRecord #:nodoc:
             unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
             child_table_pk = "#{unqualified_child_view_name.singularize}_id"
 
-            create_table(child_table, :id => false) do |t|
-              t.integer child_table_pk, :null => false
+            create_table(child_table, id: false) do |t|
+              t.integer child_table_pk, null: false
               yield t
             end
             execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
@@ -61,14 +61,14 @@ module ActiveRecord #:nodoc:
 
         # Creates aggregate updateable view of parent and child relations. The convention for naming child tables is
         # <tt>"#{child_view}_data"</tt>. If you don't follow it, supply +child_table_name+ as third argument.
-        def create_child_view(parent_table, child_view, child_table=nil, child_table_pk=nil)
-          child_table ||= child_view.to_s + "_data"
+        def create_child_view(parent_table, child_view, child_table = nil, child_table_pk = nil)
+          child_table ||= "#{child_view}_data"
 
           parent_columns = columns(parent_table)
           child_columns  = columns(child_table)
 
-          child_column_names = child_columns.collect{|c| c.name}
-          parent_column_names = parent_columns.collect{|c| c.name}
+          child_column_names = child_columns.map(&:name)
+          parent_column_names = parent_columns.map(&:name)
 
           child_pk = child_table_pk || pk_and_sequence_for(child_table)[0]
           child_column_names.delete(child_pk)
