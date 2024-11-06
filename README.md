@@ -84,13 +84,27 @@ Note that models of children classes must specify table name explicitly.
 
 ### Changing Columns in Underlying Tables
 
+#### In the parent
+
 ```ruby
-class RemoveColumnInParentTable < ActiveRecord::Migration
+class ChangeColumnsInParentTable < ActiveRecord::Migration
   def self.up
     remove_parent_and_children_views(:locomotives)
     remove_column(:locomotives, :max_speed)
     rename_column(:name, :title)
     rebuild_parent_and_children_views(:locomotives)
+  end
+end
+```
+
+#### In a child
+
+```ruby
+class ChangeColumnInChildTable < ActiveRecord::Migration
+  def self.up
+    drop_view(:steam_locomotives)
+    rename_column(:steam_locomotives_data, :coal_consumption, :fuel_consumption)
+    create_child_view(:locomotives, :steam_locomotives)
   end
 end
 ```

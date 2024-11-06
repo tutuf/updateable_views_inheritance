@@ -176,6 +176,20 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
   end
 
+  class ChangeColumnInChildTable < ActiveRecord::Migration
+    def self.up
+      drop_view(:steam_locomotives)
+      rename_column(:steam_locomotives_data, :coal_consumption, :fuel_consumption)
+      create_child_view(:locomotives, :steam_locomotives)
+    end
+  end
+
+  def test_change_column_in_child_table
+    ChangeColumnInChildTable.up
+    assert_equal %w(fuel_consumption id max_speed name type water_consumption),
+                 @connection.columns(:steam_locomotives).map(&:name).sort
+  end
+
   def test_table_exists
     #TODO: test table_exists? monkey patch
   end

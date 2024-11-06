@@ -31,11 +31,12 @@ module ActiveRecord #:nodoc:
                             parent_relation
                           end
 
-          child_table = options[:child_table] || options[:table] || quote_table_name("#{child_view}_data")
+          child_table = options[:child_table] || options[:table] || "#{child_view}_data"
+          child_table_pk = options[:child_table_pk].to_s if options[:child_table_pk]
 
           unless options.key?(:skip_creating_child_table)
             unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
-            child_table_pk = "#{unqualified_child_view_name.singularize}_id"
+            child_table_pk ||= "#{unqualified_child_view_name.singularize}_id"
 
             create_table(child_table, id: false) do |t|
               t.integer child_table_pk, null: false
@@ -45,8 +46,6 @@ module ActiveRecord #:nodoc:
             execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
                     REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
           end
-
-          child_table_pk ||= options[:child_table_pk].to_s if options[:child_table_pk]
 
           create_child_view(parent_relation, child_view, child_table, child_table_pk)
         end
