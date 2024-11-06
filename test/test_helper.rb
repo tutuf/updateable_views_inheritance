@@ -26,15 +26,7 @@ require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 require 'rails/test_help'
 require 'updateable_views_inheritance'
 
-begin
-  if RUBY_VERSION > "2"
     require 'byebug'
-  else
-    require 'debugger'
-  end
-rescue LoadError
-  # no debugger available
-end
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
