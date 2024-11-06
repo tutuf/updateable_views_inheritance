@@ -1,9 +1,18 @@
+## 1.4.7 (06 November 2024)
+
+Bugfixes:
+  - Fix create_child so that it can be used idempotently
+    with :skip_creating_child_table.
+
 ## 1.4.6 (22 October 2024)
 
 Features:
 
   - Add option for child primary key.
 
+## 1.4.5 (09 October 2024)
+
+Bugfixes:
 ## 1.4.5 (09 October 2024)
 
 Bugfixes:
