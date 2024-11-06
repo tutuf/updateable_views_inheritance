@@ -263,11 +263,16 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
         t.integer :column
       end
     end
+    def self.down
+      drop_child :table
+    end
   end
 
   def test_reserved_words_in_tables_and_columns
     ReservedSQLWords.up
     assert @connection.columns(:table).map(&:name).include?("column")
+  ensure
+    ReservedSQLWords.down
   end
 
   class ChildTableIsActuallyView < ActiveRecord::Migration

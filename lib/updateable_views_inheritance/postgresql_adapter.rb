@@ -35,16 +35,16 @@ module ActiveRecord #:nodoc:
           child_table_pk = options[:child_table_pk].to_s if options[:child_table_pk]
 
           unless options.key?(:skip_creating_child_table)
-            unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
-            child_table_pk ||= "#{unqualified_child_view_name.singularize}_id"
+          unqualified_child_view_name = Utils.extract_schema_qualified_name(child_view).identifier
+          child_table_pk ||= "#{unqualified_child_view_name.singularize}_id"
 
-            create_table(child_table, id: false) do |t|
-              t.integer child_table_pk, null: false
-              yield t
-            end
-            execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
-            execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
-                    REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
+          create_table(child_table, id: false) do |t|
+            t.integer child_table_pk, null: false
+            yield t
+          end
+          execute "ALTER TABLE #{child_table} ADD PRIMARY KEY (#{child_table_pk})"
+          execute "ALTER TABLE #{child_table} ADD FOREIGN KEY (#{child_table_pk})
+                  REFERENCES #{parent_table} ON DELETE CASCADE ON UPDATE CASCADE"
           end
 
           create_child_view(parent_relation, child_view, child_table, child_table_pk)
@@ -137,7 +137,7 @@ module ActiveRecord #:nodoc:
 
         # Drops a view from the database.
         def drop_view(name)
-          execute "DROP VIEW #{name}"
+          execute "DROP VIEW #{quote_table_name(name)}"
         end
 
         # Return the list of all views in the schema search path.
