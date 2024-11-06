@@ -18,10 +18,8 @@ class InstantiationTest < ActiveSupport::TestCase
     ActiveRecord::FixtureSet.reset_cache
   end
 
+  # FIXME: flaky test_setting_disable_inheritance_instantiation_does_not_load_child_columns
   def test_setting_disable_inheritance_instantiation_does_not_load_child_columns
-    unless Locomotive.first
-      puts "num locomotives:", @connection.select_one("SELECT count(id) FROM locomotives")
-    end
     assert_equal %w[id max_speed name type],
                  Locomotive.first.attributes.keys.sort
   end

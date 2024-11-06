@@ -1,6 +1,6 @@
 require_relative 'test_helper'
 
-class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
+class SchemaTest < ActiveSupport::TestCase
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 5)
     @connection = ActiveRecord::Base.connection
@@ -31,12 +31,19 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
       end
       create_child_view :parent_pk_only, :child
     end
+
+    def self.down
+      drop_child :child
+      drop_table :parent_pk_only
+    end
   end
 
   def test_parent_table_with_only_one_column
     ParentTableWithOnlyOneColumn.up
     assert @connection.views.include?('child')
     assert_equal %w(id name), @connection.columns(:child).map{|c| c.name}.sort
+  ensure
+    ParentTableWithOnlyOneColumn.down
   end
 
   class ChildTableWithOnlyOneColumn < ActiveRecord::Migration
@@ -299,6 +306,7 @@ class UpdateableViewsInheritanceSchemaTest < ActiveSupport::TestCase
 
   def test_child_table_is_view
     ChildTableIsActuallyView.up
-    assert @connection.columns(:punk_locomotives).map(&:name).sort == %w(coal electro id max_speed name type)
+    assert_equal @connection.columns(:punk_locomotives).map(&:name).sort,
+                 %w(coal electro id max_speed name type)
   end
 end

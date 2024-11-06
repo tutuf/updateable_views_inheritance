@@ -26,10 +26,20 @@ require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 require 'rails/test_help'
 require 'updateable_views_inheritance'
 
-    require 'byebug'
+require 'byebug'
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
   self.fixture_path = "#{File.dirname(__FILE__)}/fixtures/"
   ActiveRecord::Migration.verbose = false
+  # self.use_transactional_fixtures = true
+
+  # def teardown
+  #   ActiveRecord::Migrator.down(File.dirname(__FILE__) + '/fixtures/migrations/', 1)
+  #   ActiveRecord::FixtureSet.reset_cache
+  # end
 end
+
+# # Useful for debugging flaky tests that depend on order of other tests
+# require "minitest/reporters"
+# Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
