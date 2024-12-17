@@ -49,7 +49,7 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run tests
-        run: bundle exec rake 2>/dev/null # disable warnings until ruby 3 upgrade
+        run: bundle exec rake
 
       # From https://stackoverflow.com/questions/74199483/sonarcloud-ci-cant-find-source-files-for-ruby-simplecov-coverage
       - name: Fix code coverage paths for DeepSource
