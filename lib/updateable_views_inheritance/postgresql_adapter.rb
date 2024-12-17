@@ -126,13 +126,23 @@ module ActiveRecord #:nodoc:
                AND cons.contype  = 'p'
                AND attr.attnum   = ANY(cons.conkey)
           SQL
-          if result.blank? #result.empty?
+
+          if result.nil? or result.empty?
             parent = parent_table(relation)
             pk_and_sequence_for(parent) if parent
           else
-            # log(result[0], "PK for #{relation}") {}
-            [result[0], query("SELECT pg_get_serial_sequence('#{relation}', '#{result[0]}') ")[0][0]]
+            pk = result[0]
+            sequence = query("SELECT pg_get_serial_sequence('#{relation}', '#{result[0]}') ")[0][0]
+            if sequence
+              # ActiveRecord expects PostgreSQL::Name object as sequence, not a string
+              sequence_with_schema = Utils.extract_schema_qualified_name(sequence)
+              [pk, sequence_with_schema]
+            else
+              [pk, nil]
+            end
           end
+        rescue
+          nil
         end
 
         # Drops a view from the database.

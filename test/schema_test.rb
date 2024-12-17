@@ -7,7 +7,48 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_pk_and_sequence_for
-    assert_equal ['id', 'public.locomotives_id_seq'], @connection.pk_and_sequence_for(:maglev_locomotives), "Could not get pk and sequence for child aggregate view"
+    pk, seq = @connection.pk_and_sequence_for(:maglev_locomotives)
+    assert_equal 'id', pk
+    assert_equal 'public.locomotives_id_seq', seq.to_s
+  end
+
+  class CreateChildInSchemaWithPublicParent < ActiveRecord::Migration
+    def self.up
+      execute "CREATE SCHEMA interrail"
+      create_child('interrail.steam_locomotives', parent: 'locomotives') do |t|
+        t.decimal :interrail_water_consumption, precision: 6, scale: 2
+        t.decimal :interrail_coal_consumption,  precision: 6, scale: 2
+      end
+    end
+  end
+
+  def test_pk_and_sequence_for_child_and_parent_in_different_schemas
+    CreateChildInSchemaWithPublicParent.up
+    pk, seq = @connection.pk_and_sequence_for('interrail.steam_locomotives')
+    assert_equal 'id', pk
+    assert_equal 'public.locomotives_id_seq', seq.to_s
+  end
+
+  class CreateChildInSchemaWithParentInSchema < ActiveRecord::Migration
+    def self.up
+      execute "CREATE SCHEMA interrail"
+      create_table 'interrail.locomotives' do |t|
+        t.column :interrail_name, :string
+        t.column :interrail_max_speed, :integer
+        t.column :type, :string
+      end
+      create_child('interrail.steam_locomotives', parent: 'interrail.locomotives') do |t|
+        t.decimal :interrail_water_consumption, precision: 6, scale: 2
+        t.decimal :interrail_coal_consumption,  precision: 6, scale: 2
+      end
+    end
+  end
+
+  def test_pk_and_sequence_for_child_and_parent_in_same_nonpublic_schema
+    CreateChildInSchemaWithParentInSchema.up
+    pk, seq = @connection.pk_and_sequence_for('interrail.steam_locomotives')
+    assert_equal 'id', pk
+    assert_equal 'interrail.locomotives_id_seq', seq.to_s
   end
 
   def test_primary_key
