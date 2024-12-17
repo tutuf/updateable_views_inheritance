@@ -1,6 +1,9 @@
 # Configure Rails Environment
 ENV["RAILS_ENV"] = "test"
 
+require 'warning'
+Warning.ignore(/.*in Ruby 3.*/)
+
 # test coverage
 require 'simplecov'
 require 'simplecov_json_formatter'
