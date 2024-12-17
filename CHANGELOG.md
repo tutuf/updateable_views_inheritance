@@ -1,3 +1,7 @@
+## 1.4.8 (17 December 2024)
+Bugfixes:
+  - Fix pk_and_sequence_for to be interoperable with other AR methods
+
 ## 1.4.7 (06 November 2024)
 
 Bugfixes:
