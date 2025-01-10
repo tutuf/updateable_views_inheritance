@@ -22,7 +22,8 @@ class UpdateableViewsInheritanceMigrationTest < ActiveSupport::TestCase
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 3)
     ActiveRecord::Migrator.down(File.dirname(__FILE__) + '/fixtures/migrations/', 2)
     assert_equal %w(steam_locomotives), @connection.views.sort
-    assert_equal %w(locomotives
+    assert_equal %w(ar_internal_metadata
+                    locomotives
                     schema_migrations
                     steam_locomotives_data
                     updateable_views_inheritance), @connection.tables.sort

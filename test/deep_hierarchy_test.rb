@@ -43,7 +43,7 @@ class DeepHierarchyTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_deeper_hierarchy_contents
     mag = MaglevTrain.first
-    assert_equal [mag.id.to_s, mag.name, mag.number_of_rails.to_s, mag.max_speed.to_s, mag.magnetic_field.to_s, (sprintf("%.2f",mag.electricity_consumption))], (@connection.query("SELECT id, name, number_of_rails, max_speed, magnetic_field, electricity_consumption FROM all_vehicles WHERE id=#{mag.id}").first)
+    assert_equal [mag.id, mag.name, mag.number_of_rails, mag.max_speed, mag.magnetic_field, (sprintf("%.2f",mag.electricity_consumption))], (@connection.query("SELECT id, name, number_of_rails, max_speed, magnetic_field, electricity_consumption FROM all_vehicles WHERE id=#{mag.id}").first)
   end
 
   class OrderColumnsInAggregateView < ActiveRecord::Migration
