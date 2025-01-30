@@ -262,11 +262,6 @@ module ActiveRecord #:nodoc:
           false
         end
 
-        def table_exists_with_updateable_views_inheritance_support?(name)
-          is_view?(name) ? true : table_exists_without_updateable_views_inheritance_support?(name)
-        end
-        alias_method_chain :table_exists?, :updateable_views_inheritance_support
-
         module Tutuf #:nodoc:
           class ClassTableReflection
             class << self
@@ -403,7 +398,7 @@ module ActiveRecord #:nodoc:
         end
 
         def parent_table(relation)
-          if table_exists?('updateable_views_inheritance')
+          if data_source_exists?('updateable_views_inheritance')
            res = query(<<-SQL, 'Parent relation')[0]
               SELECT parent_relation
                 FROM updateable_views_inheritance

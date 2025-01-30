@@ -238,10 +238,6 @@ class SchemaTest < ActiveSupport::TestCase
                  @connection.columns(:steam_locomotives).map(&:name).sort
   end
 
-  def test_table_exists
-    #TODO: test table_exists? monkey patch
-  end
-
   class CreateChildInSchema < ActiveRecord::Migration
     def self.up
       execute "CREATE SCHEMA interrail"
