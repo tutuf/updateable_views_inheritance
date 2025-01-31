@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "activerecord", "~> 5.0.7"
-  s.add_dependency "pg", "~> 0.21"
+  s.add_dependency "pg"
 
   s.add_development_dependency 'bigdecimal', '1.3.5'
   s.add_development_dependency "bundler"
