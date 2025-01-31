@@ -150,16 +150,6 @@ module ActiveRecord #:nodoc:
           execute "DROP VIEW #{quote_table_name(name)}"
         end
 
-        # Return the list of all views in the schema search path.
-        def views(name=nil)
-          schemas = schema_search_path.split(/,\s*/).map { |p| quote(p) }.join(',')
-          query(<<~SQL, name).map { |row| row[0] }
-            SELECT viewname
-              FROM pg_views
-             WHERE schemaname IN (#{schemas})
-          SQL
-        end
-
         # Checks whether relation +name+ is a view.
         def is_view?(name)
           result = query(<<~SQL, name).map { |row| row[0] }
