@@ -1,8 +1,8 @@
-require'pg'
+require_relative 'test_helper'
 
 class InsertReturningOnViewWithRulesAndDefaultValue < ActiveSupport::TestCase
   def setup
-    @conn = PG.connect(dbname: 'updateable_views_inheritance_test')
+    @conn = ActiveRecord::Base.connection.raw_connection
     @conn.exec("SET client_min_messages TO 'ERROR'")
 
     @conn.exec(<<-SQL.squish)
@@ -50,11 +50,11 @@ class InsertReturningOnViewWithRulesAndDefaultValue < ActiveSupport::TestCase
 
   def test_async_exec_with_empty_binds
     res = @conn.async_exec(@sql, [])
-    assert_equal [["1"]], res.values
+    assert_equal [[1]], res.values
   end
 
   def test_async_exec_with_no_binds
     res = @conn.async_exec(@sql)
-    assert_equal [["1"]], res.values
+    assert_equal [[1]], res.values
   end
 end
