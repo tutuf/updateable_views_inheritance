@@ -12,7 +12,7 @@ class SchemaTest < ActiveSupport::TestCase
     assert_equal 'public.locomotives_id_seq', seq.to_s
   end
 
-  class CreateChildInSchemaWithPublicParent < ActiveRecord::Migration
+  class CreateChildInSchemaWithPublicParent < ActiveRecord::Migration[4.2]
     def self.up
       execute "CREATE SCHEMA interrail"
       create_child('interrail.steam_locomotives', parent: 'locomotives') do |t|
@@ -29,7 +29,7 @@ class SchemaTest < ActiveSupport::TestCase
     assert_equal 'public.locomotives_id_seq', seq.to_s
   end
 
-  class CreateChildInSchemaWithParentInSchema < ActiveRecord::Migration
+  class CreateChildInSchemaWithParentInSchema < ActiveRecord::Migration[4.2]
     def self.up
       execute "CREATE SCHEMA interrail"
       create_table 'interrail.locomotives' do |t|
@@ -64,7 +64,7 @@ class SchemaTest < ActiveSupport::TestCase
                  @connection.views.sort
   end
 
-  class ParentTableWithOnlyOneColumn < ActiveRecord::Migration
+  class ParentTableWithOnlyOneColumn < ActiveRecord::Migration[4.2]
     def self.up
       create_table(:parent_pk_only){}
       create_table :child_data do |t|
@@ -87,7 +87,7 @@ class SchemaTest < ActiveSupport::TestCase
     ParentTableWithOnlyOneColumn.down
   end
 
-  class ChildTableWithOnlyOneColumn < ActiveRecord::Migration
+  class ChildTableWithOnlyOneColumn < ActiveRecord::Migration[4.2]
     def self.up
       create_table :parent do |t|
         t.column :name, :string
@@ -132,7 +132,7 @@ class SchemaTest < ActiveSupport::TestCase
     assert SteamLocomotive.columns.find { |c| c.name == 'water_consumption' }.null
   end
 
-  class ChangeDefaultValueOfColumn < ActiveRecord::Migration
+  class ChangeDefaultValueOfColumn < ActiveRecord::Migration[4.2]
     def self.up
       remove_parent_and_children_views(:rack_locomotives)
       change_column_default(:rack_locomotives_data, :rail_system, 'Marsh')
@@ -146,7 +146,7 @@ class SchemaTest < ActiveSupport::TestCase
     assert_equal 'Marsh', RackLocomotive.new.rail_system
   end
 
-  class RemoveChildrenViews < ActiveRecord::Migration
+  class RemoveChildrenViews < ActiveRecord::Migration[4.2]
     def self.up
       remove_parent_and_children_views(:locomotives)
     end
@@ -157,7 +157,7 @@ class SchemaTest < ActiveSupport::TestCase
     assert @connection.views.empty?
   end
 
-  class RemoveColumnInParentTable < ActiveRecord::Migration
+  class RemoveColumnInParentTable < ActiveRecord::Migration[4.2]
     def self.up
       remove_parent_and_children_views(:locomotives)
       remove_column(:locomotives, :max_speed)
@@ -173,7 +173,7 @@ class SchemaTest < ActiveSupport::TestCase
                  @connection.columns(:maglev_locomotives).map{ |c| c.name }.sort
   end
 
-  class RenameColumnInParentTable < ActiveRecord::Migration
+  class RenameColumnInParentTable < ActiveRecord::Migration[4.2]
     def self.up
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :maglev_locomotives)
@@ -194,7 +194,7 @@ class SchemaTest < ActiveSupport::TestCase
 
   end
 
-  class AddColumnToParentTable < ActiveRecord::Migration
+  class AddColumnToParentTable < ActiveRecord::Migration[4.2]
     def self.up
       add_column(:raw_electric_locomotives, :number_of_engines, :integer)
       rebuild_parent_and_children_views(:electric_locomotives)
@@ -210,7 +210,7 @@ class SchemaTest < ActiveSupport::TestCase
 
   end
 
-  class ChangeChildRelationView < ActiveRecord::Migration
+  class ChangeChildRelationView < ActiveRecord::Migration[4.2]
     def self.up
       remove_parent_and_children_views(:electric_locomotives)
       rename_column(:raw_electric_locomotives, :electricity_consumption, :electric_consumption)
@@ -224,7 +224,7 @@ class SchemaTest < ActiveSupport::TestCase
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
   end
 
-  class ChangeColumnInChildTable < ActiveRecord::Migration
+  class ChangeColumnInChildTable < ActiveRecord::Migration[4.2]
     def self.up
       drop_view(:steam_locomotives)
       rename_column(:steam_locomotives_data, :coal_consumption, :fuel_consumption)
@@ -238,7 +238,7 @@ class SchemaTest < ActiveSupport::TestCase
                  @connection.columns(:steam_locomotives).map(&:name).sort
   end
 
-  class CreateChildInSchema < ActiveRecord::Migration
+  class CreateChildInSchema < ActiveRecord::Migration[4.2]
     def self.up
       execute "CREATE SCHEMA interrail"
       create_table 'interrail.locomotives' do |t|
@@ -264,7 +264,7 @@ class SchemaTest < ActiveSupport::TestCase
                  @connection.columns('interrail.steam_locomotives').map(&:name).sort
   end
 
-  class ChangeTablesInTwoInheritanceChains < ActiveRecord::Migration
+  class ChangeTablesInTwoInheritanceChains < ActiveRecord::Migration[4.2]
     def self.up
       add_column(:maglev_locomotives_data, :levitation_height, :integer)
       add_column(:bicycles_data, :wheel_size, :integer)
@@ -283,7 +283,7 @@ class SchemaTest < ActiveSupport::TestCase
            "Newly added column not present in view after rebuild for 2. hierarchy"
   end
 
-  class UseExistingTable < ActiveRecord::Migration
+  class UseExistingTable < ActiveRecord::Migration[4.2]
     def self.up
       create_table :tbl_diesel_locomotives do |t|
         t.belongs_to :locomotives
@@ -301,7 +301,7 @@ class SchemaTest < ActiveSupport::TestCase
     assert @connection.columns(:diesel_locomotives).map(&:name).include?("num_cylinders")
   end
 
-  class ReservedSQLWords < ActiveRecord::Migration
+  class ReservedSQLWords < ActiveRecord::Migration[4.2]
     def self.up
       create_child(:table, parent: :locomotives) do |t|
         t.integer :column
@@ -319,7 +319,7 @@ class SchemaTest < ActiveSupport::TestCase
     ReservedSQLWords.down
   end
 
-  class ChildTableIsActuallyView < ActiveRecord::Migration
+  class ChildTableIsActuallyView < ActiveRecord::Migration[4.2]
     def self.up
       execute <<-SQL.squish
         CREATE VIEW punk_locomotives_data AS (

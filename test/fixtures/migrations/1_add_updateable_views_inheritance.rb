@@ -1,4 +1,4 @@
-class AddUpdateableViewsInheritance < ActiveRecord::Migration
+class AddUpdateableViewsInheritance < ActiveRecord::Migration[4.2]
   def self.up
     create_table(:updateable_views_inheritance, :id => false) do |t|
       t.column :parent_relation, :string
