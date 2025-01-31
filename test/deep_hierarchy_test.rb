@@ -46,7 +46,7 @@ class DeepHierarchyTest < ActiveSupport::TestCase
     assert_equal [mag.id, mag.name, mag.number_of_rails, mag.max_speed, mag.magnetic_field, (sprintf("%.2f",mag.electricity_consumption))], (@connection.query("SELECT id, name, number_of_rails, max_speed, magnetic_field, electricity_consumption FROM all_vehicles WHERE id=#{mag.id}").first)
   end
 
-  class OrderColumnsInAggregateView < ActiveRecord::Migration
+  class OrderColumnsInAggregateView < ActiveRecord::Migration[4.2]
     def self.up
       rebuild_single_table_inheritance_view(:all_vehicles,:vehicles, %w(max_speed number_of_wheels id))
     end

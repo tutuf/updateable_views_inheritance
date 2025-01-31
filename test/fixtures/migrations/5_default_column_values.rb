@@ -1,4 +1,4 @@
-class DefaultColumnValues < ActiveRecord::Migration
+class DefaultColumnValues < ActiveRecord::Migration[4.2]
   def self.up
     create_child(:rack_locomotives, :parent => :locomotives) do |t|
       t.column :bidirectional, :boolean, :default => false
@@ -6,7 +6,7 @@ class DefaultColumnValues < ActiveRecord::Migration
       t.column :rail_system, :string, :default => 'Abt'
     end
   end
-  
+
   def self.down
     drop_child  :rack_locomotives
   end

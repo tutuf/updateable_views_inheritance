@@ -30,7 +30,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
     assert_equal electric_locomotive.name, @connection.query("SELECT name FROm all_locomotives WHERE id=#{electric_locomotive.id}").first.first
   end
 
-  class AddColumnToParentTable < ActiveRecord::Migration
+  class AddColumnToParentTable < ActiveRecord::Migration[4.2]
     def self.up
       add_column(:raw_electric_locomotives, :number_of_engines, :integer)
       drop_view(:all_locomotives)
@@ -45,7 +45,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
                  @connection.columns(:all_locomotives).map{ |c| c.name }.sort
   end
 
-  class RemoveColumnInParentTable < ActiveRecord::Migration
+  class RemoveColumnInParentTable < ActiveRecord::Migration[4.2]
     def self.up
       drop_view(:all_locomotives)
       remove_parent_and_children_views(:locomotives)
@@ -61,7 +61,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
                  @connection.columns(:all_locomotives).map{ |c| c.name }.sort
   end
 
-  class RenameColumnInParentTable < ActiveRecord::Migration
+  class RenameColumnInParentTable < ActiveRecord::Migration[4.2]
     def self.up
       drop_view(:all_locomotives)
       remove_parent_and_children_views(:locomotives)
@@ -77,7 +77,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
                  @connection.columns(:all_locomotives).map{ |c| c.name }.sort
   end
 
-  class ChangeChildRelationView < ActiveRecord::Migration
+  class ChangeChildRelationView < ActiveRecord::Migration[4.2]
     def self.up
       drop_view(:all_locomotives)
       remove_parent_and_children_views(:electric_locomotives)
@@ -93,7 +93,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
                  @connection.columns(:all_locomotives).map{ |c| c.name }.sort
   end
 
-  class ConflictColumns < ActiveRecord::Migration
+  class ConflictColumns < ActiveRecord::Migration[4.2]
     def self.up
       drop_view(:all_locomotives)
       add_column(:raw_electric_locomotives, :number_of_engines, :integer)
@@ -111,7 +111,7 @@ class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
     assert_equal 'text', @connection.columns(:all_locomotives).detect{|c| c.name == "number_of_engines"}.sql_type
   end
 
-  class ConflictColumnsWithValues < ActiveRecord::Migration
+  class ConflictColumnsWithValues < ActiveRecord::Migration[4.2]
     def self.up
       add_column(:raw_electric_locomotives, :number_of_engines, :integer)
       add_column(:steam_locomotives_data, :number_of_engines, :string)

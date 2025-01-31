@@ -1,4 +1,4 @@
-class CreateWithDefaultTable < ActiveRecord::Migration
+class CreateWithDefaultTable < ActiveRecord::Migration[4.2]
   def self.up
     create_table :locomotives do |t|
       t.column :name, :string

@@ -1,4 +1,4 @@
-class SecondSingleTableInheritanceView < ActiveRecord::Migration
+class SecondSingleTableInheritanceView < ActiveRecord::Migration[4.2]
   def self.up
     rebuild_parent_and_children_views(:vehicles)
     create_single_table_inheritance_view(:all_vehicles,:vehicles)
