@@ -1,3 +1,7 @@
+## 1.5.0 (31 January 2025)
+
+Upgrade to Rails 5
+
 ## 1.4.8 (17 December 2024)
 Bugfixes:
   - Fix pk_and_sequence_for to be interoperable with other AR methods
