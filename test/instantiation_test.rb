@@ -3,11 +3,12 @@ require_relative 'test_helper'
 class InstantiationTest < ActiveSupport::TestCase
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 7)
+
+    ActiveRecord::FixtureSet.reset_cache
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w[steam_locomotives electric_locomotives maglev_locomotives bicycles].each do |f|
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
-    @connection = ActiveRecord::Base.connection
 
     Locomotive.disable_inheritance_instantiation = true
     ElectricLocomotive.disable_inheritance_instantiation = false
@@ -15,7 +16,6 @@ class InstantiationTest < ActiveSupport::TestCase
 
   def teardown
     Locomotive.disable_inheritance_instantiation = false
-    ActiveRecord::FixtureSet.reset_cache
   end
 
   # FIXME: flaky test_setting_disable_inheritance_instantiation_does_not_load_child_columns
