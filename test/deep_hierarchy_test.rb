@@ -3,15 +3,13 @@ require File.join(File.dirname(__FILE__), 'test_helper')
 class DeepHierarchyTest < ActiveSupport::TestCase
   def setup
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 8)
+
+    ActiveRecord::FixtureSet.reset_cache
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w(boats electric_trains rack_trains steam_trains cars maglev_trains bicycles).each do |f|
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
     @connection = ActiveRecord::Base.connection
-  end
-
-  def teardown
-    ActiveRecord::FixtureSet.reset_cache
   end
 
   def test_deeper_hierarchy
