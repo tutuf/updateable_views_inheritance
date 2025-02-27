@@ -1,5 +1,5 @@
 class DefaultColumnValues < ActiveRecord::Migration[4.2]
-  def self.up
+  def up
     create_child(:rack_locomotives, :parent => :locomotives) do |t|
       t.column :bidirectional, :boolean, :default => false
       t.column :narrow_gauge, :boolean, :default => true

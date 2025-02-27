@@ -1,5 +1,5 @@
 class CreateWithDefaultTable < ActiveRecord::Migration[4.2]
-  def self.up
+  def up
     create_table :locomotives do |t|
       t.column :name, :string
       t.column :max_speed, :integer

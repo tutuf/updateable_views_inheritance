@@ -45,13 +45,13 @@ class DeepHierarchyTest < ActiveSupport::TestCase
   end
 
   class OrderColumnsInAggregateView < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       rebuild_single_table_inheritance_view(:all_vehicles,:vehicles, %w(max_speed number_of_wheels id))
     end
   end
 
   def test_single_table_inheritance_view_order_view_columns
-    OrderColumnsInAggregateView.up
+    OrderColumnsInAggregateView.new.up
     assert_equal %w(max_speed number_of_wheels id),
                  (@connection.query("SELECT attname
                                        FROM pg_class, pg_attribute

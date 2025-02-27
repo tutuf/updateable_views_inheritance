@@ -13,7 +13,7 @@ class SecondDeepHierarchy < ActiveRecord::Migration[4.2]
   #             steam_trains    rack_trains     electric_trains
   #                                                   |
   #                                               maglev_trains
-  def self.up
+  def up
     create_table :vehicles do |t|
       t.column :name, :string
       t.column :vehicle_type, :string

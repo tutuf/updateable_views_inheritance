@@ -13,7 +13,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class CreateChildInSchemaWithPublicParent < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       execute "CREATE SCHEMA interrail"
       create_child('interrail.steam_locomotives', parent: 'locomotives') do |t|
         t.decimal :interrail_water_consumption, precision: 6, scale: 2
@@ -23,14 +23,14 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_pk_and_sequence_for_child_and_parent_in_different_schemas
-    CreateChildInSchemaWithPublicParent.up
+    CreateChildInSchemaWithPublicParent.new.up
     pk, seq = @connection.pk_and_sequence_for('interrail.steam_locomotives')
     assert_equal 'id', pk
     assert_equal 'public.locomotives_id_seq', seq.to_s
   end
 
   class CreateChildInSchemaWithParentInSchema < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       execute "CREATE SCHEMA interrail"
       create_table 'interrail.locomotives' do |t|
         t.column :interrail_name, :string
@@ -45,7 +45,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_pk_and_sequence_for_child_and_parent_in_same_nonpublic_schema
-    CreateChildInSchemaWithParentInSchema.up
+    CreateChildInSchemaWithParentInSchema.new.up
     pk, seq = @connection.pk_and_sequence_for('interrail.steam_locomotives')
     assert_equal 'id', pk
     assert_equal 'interrail.locomotives_id_seq', seq.to_s
@@ -65,7 +65,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class ParentTableWithOnlyOneColumn < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       create_table(:parent_pk_only){}
       create_table :child_data do |t|
         t.column :name, :string
@@ -80,7 +80,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_parent_table_with_only_one_column
-    ParentTableWithOnlyOneColumn.up
+    ParentTableWithOnlyOneColumn.new.up
     assert @connection.views.include?('child')
     assert_equal %w(id name), @connection.columns(:child).map{|c| c.name}.sort
   ensure
@@ -88,7 +88,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class ChildTableWithOnlyOneColumn < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       create_table :parent do |t|
         t.column :name, :string
       end
@@ -98,7 +98,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_child_table_with_only_one_column
-    ChildTableWithOnlyOneColumn.up
+    ChildTableWithOnlyOneColumn.new.up
     assert @connection.views.include?('child_pk_only'), "Could not create child view when child table has only one column"
     assert_equal %w(id name), @connection.columns(:child_pk_only).map{|c| c.name}.sort
   end
@@ -133,7 +133,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class ChangeDefaultValueOfColumn < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       remove_parent_and_children_views(:rack_locomotives)
       change_column_default(:rack_locomotives_data, :rail_system, 'Marsh')
       rebuild_parent_and_children_views(:rack_locomotives)
@@ -141,24 +141,24 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_change_default_value_of_column
-    ChangeDefaultValueOfColumn.up
+    ChangeDefaultValueOfColumn.new.up
     RackLocomotive.reset_column_information
     assert_equal 'Marsh', RackLocomotive.new.rail_system
   end
 
   class RemoveChildrenViews < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       remove_parent_and_children_views(:locomotives)
     end
   end
 
   def test_remove_parent_and_children_views
-    RemoveChildrenViews.up
+    RemoveChildrenViews.new.up
     assert @connection.views.empty?
   end
 
   class RemoveColumnInParentTable < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       remove_parent_and_children_views(:locomotives)
       remove_column(:locomotives, :max_speed)
       rebuild_parent_and_children_views(:locomotives)
@@ -166,7 +166,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_remove_column_parent_table
-    RemoveColumnInParentTable.up
+    RemoveColumnInParentTable.new.up
     assert_equal %w(coal_consumption id name type water_consumption),
                  @connection.columns(:steam_locomotives).map{ |c| c.name }.sort
     assert_equal %w(electricity_consumption id magnetic_field name type),
@@ -174,7 +174,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class RenameColumnInParentTable < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :maglev_locomotives)
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
@@ -186,7 +186,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_rename_column_parent_table
-    RenameColumnInParentTable.up
+    RenameColumnInParentTable.new.up
     assert_equal %w(coal_consumption id maximal_speed name type water_consumption),
                  @connection.columns(:steam_locomotives).map{ |c| c.name }.sort
     assert_equal %w(electricity_consumption id magnetic_field maximal_speed name type),
@@ -195,14 +195,14 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class AddColumnToParentTable < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       add_column(:raw_electric_locomotives, :number_of_engines, :integer)
       rebuild_parent_and_children_views(:electric_locomotives)
     end
   end
 
   def test_add_column_to_parent_table
-    AddColumnToParentTable.up
+    AddColumnToParentTable.new.up
     assert_equal %w(electricity_consumption id max_speed name number_of_engines type),
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
     assert_equal %w(electricity_consumption id magnetic_field max_speed name number_of_engines type),
@@ -211,7 +211,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class ChangeChildRelationView < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       remove_parent_and_children_views(:electric_locomotives)
       rename_column(:raw_electric_locomotives, :electricity_consumption, :electric_consumption)
       rebuild_parent_and_children_views(:electric_locomotives)
@@ -219,13 +219,13 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_change_child_relation_view
-    ChangeChildRelationView.up
+    ChangeChildRelationView.new.up
     assert_equal %w(electric_consumption id max_speed name type),
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
   end
 
   class ChangeColumnInChildTable < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       drop_view(:steam_locomotives)
       rename_column(:steam_locomotives_data, :coal_consumption, :fuel_consumption)
       create_child_view(:locomotives, :steam_locomotives)
@@ -233,13 +233,13 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_change_column_in_child_table
-    ChangeColumnInChildTable.up
+    ChangeColumnInChildTable.new.up
     assert_equal %w(fuel_consumption id max_speed name type water_consumption),
                  @connection.columns(:steam_locomotives).map(&:name).sort
   end
 
   class CreateChildInSchema < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       execute "CREATE SCHEMA interrail"
       create_table 'interrail.locomotives' do |t|
         t.column :interrail_name, :string
@@ -254,7 +254,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_create_child_in_schema
-    CreateChildInSchema.up
+    CreateChildInSchema.new.up
     assert_equal %w[id
                     interrail_coal_consumption
                     interrail_max_speed
@@ -265,7 +265,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class ChangeTablesInTwoInheritanceChains < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       add_column(:maglev_locomotives_data, :levitation_height, :integer)
       add_column(:bicycles_data, :wheel_size, :integer)
       rebuild_all_parent_and_children_views
@@ -275,7 +275,7 @@ class SchemaTest < ActiveSupport::TestCase
   def test_rebuild_all_parent_and_children_views
     ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 7)
     @connection.execute "DROP VIEW all_locomotives" #FIXME: single table inheritance view should be rebuilt as well
-    ChangeTablesInTwoInheritanceChains.up
+    ChangeTablesInTwoInheritanceChains.new.up
 
     assert @connection.columns(:maglev_locomotives).map{ |c| c.name }.include?('levitation_height'),
            "Newly added column not present in view after rebuild for 1. hierarchy"
@@ -284,7 +284,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   class UseExistingTable < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       create_table :tbl_diesel_locomotives do |t|
         t.belongs_to :locomotives
         t.integer :num_cylinders
@@ -297,12 +297,12 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_skip_creating_child_table
-    UseExistingTable.up
+    UseExistingTable.new.up
     assert @connection.columns(:diesel_locomotives).map(&:name).include?("num_cylinders")
   end
 
   class ReservedSQLWords < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       create_child(:table, parent: :locomotives) do |t|
         t.integer :column
       end
@@ -313,14 +313,14 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_reserved_words_in_tables_and_columns
-    ReservedSQLWords.up
+    ReservedSQLWords.new.up
     assert @connection.columns(:table).map(&:name).include?("column")
   ensure
     ReservedSQLWords.down
   end
 
   class ChildTableIsActuallyView < ActiveRecord::Migration[4.2]
-    def self.up
+    def up
       execute <<-SQL.squish
         CREATE VIEW punk_locomotives_data AS (
           SELECT steam_locomotives.id,
@@ -342,7 +342,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_child_table_is_view
-    ChildTableIsActuallyView.up
+    ChildTableIsActuallyView.new.up
     assert_equal @connection.columns(:punk_locomotives).map(&:name).sort,
                  %w(coal electro id max_speed name type)
   end
