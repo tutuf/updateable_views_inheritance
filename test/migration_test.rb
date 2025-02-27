@@ -7,20 +7,20 @@ class UpdateableViewsInheritanceMigrationTest < ActiveSupport::TestCase
   end
 
   def test_create_child_default
-    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 2)
+    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 2).migrate
     assert_equal %w(coal_consumption id max_speed name type water_consumption),
                  @connection.columns(:steam_locomotives).map{ |c| c.name }.sort
   end
 
   def test_create_child_explicit_table
-    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 3)
+    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 3).migrate
     assert_equal %w(electricity_consumption id max_speed name type),
                  @connection.columns(:electric_locomotives).map{ |c| c.name }.sort
   end
 
   def test_drop_child
-    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 3)
-    ActiveRecord::Migrator.down(File.dirname(__FILE__) + '/fixtures/migrations/', 2)
+    ActiveRecord::Migrator.new(:up,   ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 3).migrate
+    ActiveRecord::Migrator.new(:down, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 2).migrate
     assert_equal %w(steam_locomotives), @connection.views.sort
     assert_equal %w(ar_internal_metadata
                     locomotives
