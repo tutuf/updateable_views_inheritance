@@ -342,25 +342,26 @@ module ActiveRecord #:nodoc:
           SQL
 
           # update
-          execute(<<~SQL)
+          update_rule = <<~SQL
             CREATE OR REPLACE RULE #{quote_column_name("#{child_view}_update")} AS
             ON UPDATE TO #{quote_table_name(child_view)} DO INSTEAD (
-              #{ if parent_columns.empty?
-                   ''
-                 else
-                   "UPDATE #{parent_table}
-                       SET #{ parent_columns.map { |col| "#{quote_column_name(col)} = NEW.#{quote_column_name(col)}" }.join(', ')}
-                       WHERE #{parent_pk} = OLD.#{parent_pk};"
-                 end }
-              #{ if child_columns.empty?
-                   ''
-                 else
-                   "UPDATE #{child_table}
-                       SET #{ child_columns.map { |col| "#{quote_column_name(col)} = NEW.#{quote_column_name(col)}" }.join(', ')}
-                       WHERE #{child_pk} = OLD.#{parent_pk}"
-                 end }
-            )
           SQL
+          unless parent_columns.empty?
+            update_rule += <<~SQL
+              UPDATE #{parent_table}
+              SET #{parent_columns.map { |col| "#{quote_column_name(col)} = NEW.#{quote_column_name(col)}" }.join(', ')}
+              WHERE #{parent_pk} = OLD.#{parent_pk};
+            SQL
+          end
+          unless child_columns.empty?
+            update_rule += <<~SQL
+              UPDATE #{child_table}
+              SET #{ child_columns.map { |col| "#{quote_column_name(col)} = NEW.#{quote_column_name(col)}" }.join(', ')}
+              WHERE #{child_pk} = OLD.#{parent_pk}
+            SQL
+          end
+          update_rule += ")"
+          execute(update_rule)
         end
 
         def insert_returning_clause(parent_pk, child_pk, child_view)
