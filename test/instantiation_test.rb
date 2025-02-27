@@ -2,7 +2,7 @@ require_relative 'test_helper'
 
 class InstantiationTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 7)
+    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 7).migrate
 
     ActiveRecord::FixtureSet.reset_cache
     # order of fixtures is important for the test - last loaded should not be with max(id)

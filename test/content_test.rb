@@ -2,7 +2,7 @@ require_relative 'test_helper'
 
 class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.up(File.dirname(__FILE__) + '/fixtures/migrations/', 5)
+    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 5).migrate
     ActiveRecord::FixtureSet.reset_cache
   end
 
