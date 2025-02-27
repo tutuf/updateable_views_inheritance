@@ -1,3 +1,7 @@
+## 1.5.1 (27 February 2025)
+
+Upgrade to Rails 5.1
+
 ## 1.5.0 (31 January 2025)
 
 Upgrade to Rails 5
