@@ -365,11 +365,14 @@ module ActiveRecord #:nodoc:
         end
 
         def insert_returning_clause(parent_pk, child_pk, child_view)
-          columns_cast_to_null = columns(child_view)
-                                 .reject { |c| c.name == parent_pk }
-                                 .map { |c| "CAST (NULL AS #{c.sql_type})" }
-                                 .join(", ")
-          "RETURNING #{child_pk}, #{columns_cast_to_null}"
+          columns_cast = columns(child_view).map do |c|
+            if c.name == parent_pk
+              "#{child_pk}::#{c.sql_type}"
+            else
+              "NULL::#{c.sql_type}"
+            end
+          end.join(", ")
+          "RETURNING #{columns_cast}"
         end
 
         def create_system_table_records(parent_relation, child_aggregate_view, child_relation)
