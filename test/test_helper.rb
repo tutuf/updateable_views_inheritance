@@ -33,9 +33,7 @@ require 'byebug'
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
-  self.fixture_path = "#{File.dirname(__FILE__)}/fixtures/"
   ActiveRecord::Migration.verbose = false
-  # self.use_transactional_fixtures = true
 
   # def teardown
   #   ActiveRecord::Migrator.down(File.dirname(__FILE__) + '/fixtures/migrations/', 1)

@@ -2,12 +2,12 @@ require File.join(File.dirname(__FILE__), 'test_helper')
 
 class DeepHierarchyTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 8).migrate
+    ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrate(8)
 
     ActiveRecord::FixtureSet.reset_cache
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w(boats electric_trains rack_trains steam_trains maglev_trains bicycles).each do |f|
-      ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
+      ActiveRecord::FixtureSet.create_fixtures("#{__dir__}/fixtures/", f)
     end
     @connection = ActiveRecord::Base.connection
   end
@@ -41,7 +41,7 @@ class DeepHierarchyTest < ActiveSupport::TestCase
 
   def test_single_table_inheritance_deeper_hierarchy_contents
     mag = MaglevTrain.first
-    assert_equal [mag.id, mag.name, mag.number_of_rails, mag.max_speed, mag.magnetic_field, (sprintf("%.2f",mag.electricity_consumption))], (@connection.query("SELECT id, name, number_of_rails, max_speed, magnetic_field, electricity_consumption FROM all_vehicles WHERE id=#{mag.id}").first)
+    assert_equal [mag.id, mag.name, mag.number_of_rails, mag.max_speed, mag.magnetic_field, mag.electricity_consumption], (@connection.query("SELECT id, name, number_of_rails, max_speed, magnetic_field, electricity_consumption FROM all_vehicles WHERE id=#{mag.id}").first)
   end
 
   class OrderColumnsInAggregateView < ActiveRecord::Migration[4.2]

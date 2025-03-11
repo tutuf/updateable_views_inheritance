@@ -2,10 +2,9 @@ require_relative 'test_helper'
 
 class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 5).migrate
+    ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrate(5)
     ActiveRecord::FixtureSet.reset_cache
   end
-
 
   def test_find
     ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
@@ -33,10 +32,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
     ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :electric_locomotives)
     ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
 
-    binds = [[ElectricLocomotive.columns.find { |c| c.name == 'electricity_consumption'}, 40],
-             [ElectricLocomotive.columns.find { |c| c.name == 'max_speed'},              120],
-             [ElectricLocomotive.columns.find { |c| c.name == 'name'},                'BoBo'],
-             [ElectricLocomotive.columns.find { |c| c.name == 'type'},  'ElectricLocomotive']]
+    binds = [40, 120, 'BoBo', 'ElectricLocomotive']
     res = ActiveRecord::Base.connection.exec_query(<<-SQL, 'Test prepared statement', binds)
       INSERT INTO electric_locomotives (electricity_consumption, max_speed, name, type) VALUES ($1, $2, $3, $4) RETURNING id
     SQL
@@ -63,7 +59,7 @@ class UpdateableViewsInheritanceContentTest < ActiveSupport::TestCase
   def test_update
     ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', :steam_locomotives)
     steam_locomotive = Locomotive.find(1)
-    steam_locomotive.update_attributes( :name => 'Rocket')
+    steam_locomotive.update(name: 'Rocket')
     steam_locomotive.reload
     assert_equal 'Rocket', steam_locomotive.name
   end

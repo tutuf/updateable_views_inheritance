@@ -2,7 +2,7 @@ require_relative 'test_helper'
 
 class SingleTableInheritanceAggregateViewTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 6).migrate
+    ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrate(6)
     # order of fixtures is important for the test - last loaded should not be with max(id)
     %w(electric_locomotives maglev_locomotives steam_locomotives).each do |f|
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)

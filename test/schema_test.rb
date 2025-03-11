@@ -2,7 +2,7 @@ require_relative 'test_helper'
 
 class SchemaTest < ActiveSupport::TestCase
   def setup
-    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 5).migrate
+    ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrate(5)
     @connection = ActiveRecord::Base.connection
   end
 
@@ -273,7 +273,7 @@ class SchemaTest < ActiveSupport::TestCase
   end
 
   def test_rebuild_all_parent_and_children_views
-    ActiveRecord::Migrator.new(:up, ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrations, 7).migrate
+    ActiveRecord::MigrationContext.new("#{__dir__}/fixtures/migrations").migrate(7)
     @connection.execute "DROP VIEW all_locomotives" #FIXME: single table inheritance view should be rebuilt as well
     ChangeTablesInTwoInheritanceChains.new.up
 
