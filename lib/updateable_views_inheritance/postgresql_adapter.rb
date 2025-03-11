@@ -90,19 +90,29 @@ module ActiveRecord #:nodoc:
           if parent
             reset_pk_sequence!(parent, pk, sequence)
           else
-            unless pk and sequence
+            unless pk && sequence
               default_pk, default_sequence = pk_and_sequence_for(table)
+
               pk ||= default_pk
               sequence ||= default_sequence
             end
-            if pk
-              if sequence
-                select_value <<-SQL, 'Reset sequence'
-                  SELECT setval('#{sequence}', (SELECT COALESCE(MAX(#{pk})+(SELECT increment_by FROM #{sequence}), (SELECT min_value FROM #{sequence})) FROM #{table}), false)
-                SQL
-              else
-                @logger.warn "#{table} has primary key #{pk} with no default sequence" if @logger
+
+            if @logger && pk && !sequence
+              @logger.warn "#{table} has primary key #{pk} with no default sequence."
+            end
+
+            if pk && sequence
+              quoted_sequence = quote_table_name(sequence)
+              max_pk = query_value("SELECT MAX(#{quote_column_name pk}) FROM #{quote_table_name(table)}", "SCHEMA")
+              if max_pk.nil?
+                if postgresql_version >= 100000
+                  minvalue = query_value("SELECT seqmin FROM pg_sequence WHERE seqrelid = #{quote(quoted_sequence)}::regclass", "SCHEMA")
+                else
+                  minvalue = query_value("SELECT min_value FROM #{quoted_sequence}", "SCHEMA")
+                end
               end
+
+              query_value("SELECT setval(#{quote(quoted_sequence)}, #{max_pk ? max_pk : minvalue}, #{max_pk ? true : false})", "SCHEMA")
             end
           end
         end
