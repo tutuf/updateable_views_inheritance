@@ -6,7 +6,7 @@ class DeepHierarchyTest < ActiveSupport::TestCase
 
     ActiveRecord::FixtureSet.reset_cache
     # order of fixtures is important for the test - last loaded should not be with max(id)
-    %w(boats electric_trains rack_trains steam_trains cars maglev_trains bicycles).each do |f|
+    %w(boats electric_trains rack_trains steam_trains maglev_trains bicycles).each do |f|
       ActiveRecord::FixtureSet.create_fixtures(File.dirname(__FILE__) + '/fixtures/', f)
     end
     @connection = ActiveRecord::Base.connection
