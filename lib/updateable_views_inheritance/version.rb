@@ -1,3 +1,3 @@
 module UpdateableViewsInheritance
-  VERSION = "1.5.1"
+  VERSION = "1.7.0"
 end

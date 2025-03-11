@@ -1,3 +1,7 @@
+## 1.7.0 (11 March 2025)
+
+Upgrade to Rails 7 (tested with 7.0, 7.1, 7.2 and ruby 2.7.3, 3.1.6)
+
 ## 1.5.1 (27 February 2025)
 
 Upgrade to Rails 5.1
