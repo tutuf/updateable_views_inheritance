@@ -18,14 +18,13 @@ Gem::Specification.new do |s|
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ["lib"]
 
-  s.add_dependency "activerecord", '>= 7', '< 8'
+  s.add_dependency "activerecord", '>= 8', '< 9'
   s.add_dependency "pg"
 
   s.add_development_dependency "bundler"
-  s.add_development_dependency "concurrent-ruby", '1.3.4'
   s.add_development_dependency "minitest"
   s.add_development_dependency "minitest-reporters"
-  s.add_development_dependency "rails", '>= 7', '< 8'
+  s.add_development_dependency "rails"
   s.add_development_dependency "rake"
   s.add_development_dependency "simplecov"
   s.add_development_dependency "simplecov_json_formatter"

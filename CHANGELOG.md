@@ -1,3 +1,7 @@
+## 1.8.0 (19 April 2026)
+
+Upgrade to Rails 8.1
+
 ## 1.7.0 (11 March 2025)
 
 Upgrade to Rails 7 (tested with 7.0, 7.1, 7.2 and ruby 2.7.3, 3.1.6)

@@ -9,7 +9,7 @@ module UpdateableViewsInheritance# :nodoc:
         if object.class.name == self.name || self.disable_inheritance_instantiation
           object
         else
-          object.class.find(attributes.with_indifferent_access[:id])
+          object.class.find(attributes.to_h.with_indifferent_access[:id])
         end
       end
     end
